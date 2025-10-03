@@ -15,36 +15,36 @@ table_results <- function(label_list, model_test) {
   #source('./scripts/00_FUNCTIONS/FUNCTION_drop1_output.R')
   
   table_00 <- model_test %>%
-    tbl_regression(intercept = T,
+    gtsummary::tbl_regression(intercept = T,
                    label = label_list,
                    estimate_fun = ~ style_number(.x, digits = 2))
   
   ## add features
   table_01 <- table_00 %>% 
-    add_global_p(anova_fun = drop1_output) %>% 
-    bold_p(t = 0.05) %>% 
-    bold_labels() %>%
-    italicize_levels() %>% 
-    modify_table_body(fun = function(.){
-      output <- left_join(x = .,
-                          y = drop1_output(x = model_test) %>% 
-                            dplyr::select(variable = term, Chisq=statistic, df),
-                          by = "variable")
-      output$df <- ifelse(output$row_type == "label",  output$df, NA)
-      output$Chisq <- ifelse(output$row_type == "label",  output$Chisq, NA)
+    gtsummary::add_global_p(anova_fun = drop1_output) %>% 
+    gtsummary::bold_p(t = 0.05) %>% 
+    gtsummary::bold_labels() %>%
+    gtsummary::italicize_levels() %>% 
+    gtsummary::modify_table_body(fun = function(.){
+      output <- dplyr::left_join(x = .,
+                                 y = drop1_output(model_test = model_test) %>% 
+                                   dplyr::select(variable = term, Chisq=statistic, df),
+                                 by = "variable")
+      output$df <- base::ifelse(output$row_type == "label",  output$df, NA)
+      output$Chisq <- base::ifelse(output$row_type == "label",  output$Chisq, NA)
       return(output)
     }) %>% 
-    modify_fmt_fun(c(Chisq) ~ function(x) style_number(x, digits = 2)) %>%
-    modify_fmt_fun(c(std.error) ~ function(x) style_number(x, digits = 2)) %>%
-    modify_fmt_fun(c(p.value) ~ function(x) style_number(x, digits = 3)) %>%
-    modify_table_body(~.x %>% dplyr::relocate(p.value, .after = df)) %>% 
-    modify_header(label ~ "**Fixed effect**") %>% 
-    modify_header(std.error ~ "**SE**") %>%
-    modify_header(estimate ~ "**Estimate**") %>%
-    modify_header(df ~ "**df**") %>% 
-    modify_header(Chisq ~ html("<b>&chi;<sup>2</sup></b>")) %>% 
-    as_gt() %>% 
-    opt_footnote_marks(marks = "LETTERS")
+    gtsummary::modify_fmt_fun(c(Chisq) ~ function(x) style_number(x, digits = 2)) %>%
+    gtsummary::modify_fmt_fun(c(std.error) ~ function(x) style_number(x, digits = 2)) %>%
+    gtsummary::modify_fmt_fun(c(p.value) ~ function(x) style_number(x, digits = 3)) %>%
+    gtsummary::modify_table_body(~.x %>% dplyr::relocate(p.value, .after = df)) %>% 
+    gtsummary::modify_header(label ~ "**Fixed effect**") %>% 
+    gtsummary::modify_header(std.error ~ "**SE**") %>%
+    gtsummary::modify_header(estimate ~ "**Estimate**") %>%
+    gtsummary::modify_header(df ~ "**df**") %>% 
+    gtsummary::modify_header(Chisq ~ html("<b>&chi;<sup>2</sup></b>")) %>% 
+    gtsummary::as_gt() %>% 
+    gtsummary::opt_footnote_marks(marks = "LETTERS")
   
   return(table_01)
 }

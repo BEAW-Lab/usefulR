@@ -1,0 +1,24 @@
+Package: usefulR
+Type: Package
+Title: Useful R functions for BEAW Research Group
+Version: 0.0.1.
+Date: 2025-10-03
+Authors@R: person ("Pablo", "Capilla-Lasheras", email="pacapilla@gmail.com", role=c("aut",
+    "cre"))
+Author: Pablo Capilla-Lasheras [aut, cre]
+Maintainer: Pablo Capilla-Lasheras <pacapilla@gmail.com>
+Description: Useful R functions for BEAW Research Group
+License: GPL-3
+Depends: R (>= 3.4.0), 
+    base,
+    broom,
+    dplyr,
+    gtsummary,
+    stats
+Imports: 
+Suggests: 
+VignetteBuilder:
+    knitr
+LazyData: true
+Encoding: UTF-8
+RoxygenNote: 7.3.3

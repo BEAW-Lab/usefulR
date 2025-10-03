@@ -12,7 +12,7 @@
 drop1_output <- function(model_test, ...){
     x <- stats::drop1(model_test, test = "Chisq")
     x$AIC <- NULL
-    names(x) <- c("Df", "Chisq", "Pr(>Chisq)")
+    names(x) <- base::c("Df", "Chisq", "Pr(>Chisq)")
     output <- broom::tidy(x)
     return(output)  
 }
