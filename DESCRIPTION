@@ -15,8 +15,6 @@ Depends: R (>= 3.4.0),
     dplyr,
     gtsummary,
     stats
-Imports: 
-Suggests: 
 VignetteBuilder:
     knitr
 LazyData: true
