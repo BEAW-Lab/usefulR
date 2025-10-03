@@ -44,7 +44,7 @@ table_results <- function(label_list, model_test) {
     gtsummary::modify_header(df ~ "**df**") %>% 
     gtsummary::modify_header(Chisq ~ html("<b>&chi;<sup>2</sup></b>")) %>% 
     gtsummary::as_gt() %>% 
-    gtsummary::opt_footnote_marks(marks = "LETTERS")
+    gt::opt_footnote_marks(marks = "LETTERS")
   
   return(table_01)
 }
