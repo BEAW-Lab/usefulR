@@ -20,7 +20,7 @@ Depends: R (>= 3.4.0),
     stats,
   	terra
 Suggests:
-    knitr
+    knitr,
     rmarkdown
 VignetteBuilder:
     knitr

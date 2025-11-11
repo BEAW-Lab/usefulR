@@ -24,7 +24,7 @@ library(usefulR)
 In this vignette we will:
 
 * calculate urban score using `extract_land_cover.R`
-* run a mix model to investigate whether urbanisation score drives variation in a trait
+* run a model to investigate whether urbanisation score drives variation in a trait
 * generate a publication-ready table using `table_results.R`
 
 ## Simulate data
