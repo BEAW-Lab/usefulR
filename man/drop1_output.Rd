@@ -2,9 +2,9 @@
 % Please edit documentation in R/drop1_output.R
 \name{drop1_output}
 \alias{drop1_output}
-\title{Computes likelihood-ratio test results for a given mdoel.}
+\title{Computes likelihood-ratio test results for a given model.}
 \usage{
-drop1_output(model_test, ...)
+drop1_output(model_test, test = c("Chisq", "F"), ...)
 }
 \arguments{
 \item{model_test}{Name of the model to be tested.}

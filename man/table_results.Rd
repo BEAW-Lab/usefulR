@@ -4,12 +4,14 @@
 \alias{table_results}
 \title{Outputs a table with model results}
 \usage{
-table_results(label_list, model_test)
+table_results(label_list, model_test, test)
 }
 \arguments{
 \item{label_list}{List of predictor names to appear in the table of results.}
 
 \item{model_test}{Name of the model to produce a result table from.}
+
+\item{test}{either 'F' or 'Chisq'}
 }
 \value{
 A table with model results. It can be easily saved in html to include in your reports / manuscript.

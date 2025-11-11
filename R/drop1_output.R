@@ -1,4 +1,4 @@
-#' Computes likelihood-ratio test results for a given mdoel.
+#' Computes likelihood-ratio test results for a given model.
 #'
 #' @description
 #' This function is a wrapper of stats::drop1() inside gtsummary::tbl_regression. 
@@ -9,10 +9,18 @@
 #' # to be included
 #'
 #' @export
-drop1_output <- function(model_test, ...){
-    x <- stats::drop1(model_test, test = "Chisq")
-    x$AIC <- NULL
-    names(x) <- base::c("Df", "Chisq", "Pr(>Chisq)")
-    output <- broom::tidy(x)
+drop1_output <- function(model_test, test = c("Chisq", "F"), ...){
+    x <- stats::drop1(model_test, test = test)
+    
+    if(test == "Chisq") {
+      x$AIC <- NULL
+      names(x) <- base::c("Df", "Chisq", "Pr(>Chisq)")
+      output <- broom::tidy(x)
+    } else {
+      x$AIC <- NULL
+      names(x) <- base::c("Df", "Sum of Sq", "RSS", "F value", "Pr(>F)")
+      output <- broom::tidy(x)
+    }
     return(output)  
+    
 }

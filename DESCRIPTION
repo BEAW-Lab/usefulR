@@ -13,9 +13,12 @@ Depends: R (>= 3.4.0),
     base,
     broom,
     dplyr,
+	exactextractr,
     gt,
     gtsummary,
-    stats
+	sf,
+    stats,
+	terra
 VignetteBuilder:
     knitr
 LazyData: true

@@ -1,5 +1,13 @@
 # Collection of useful R functions
 
-Bundle of R functions in the form of an R package containing useful resources for data wrangling, visualisation, analysis and creation of publication-ready tables of results. If you find a problem or would like to add or improve a function, create a [pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests).
+Bundle of R functions in the form of an R package containing useful resources for data wrangling, visualisation, analysis and creation of publication-ready tables of results. 
+If you find a problem or would like to add or improve a function, create a [pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests).
 
 ## **IMPORTANT**: Use our critical assessment when using these functions. Always double check that the output they produce aligns with the results of your analysis.
+
+# Installation
+```{r eval = F}
+# install.packages("pak")
+pak::pkg_install("BEAW-Lab/usefulR")
+
+```
