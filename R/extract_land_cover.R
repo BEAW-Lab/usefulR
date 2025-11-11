@@ -18,7 +18,10 @@
 extract_land_cover <- function(coords, radius_m, 
                                 cat_vals = c(50), # this is the value for impervious surface
                                 value_scale = 100) {
-  rast <- terra::rast("./data/LC_raster.tif")
+  
+  # access raster data
+  raster_path <- system.file("extdata", "LC_raster.tif", package = "usefulR")
+  rast <- terra::rast(raster_path)
   
   # Read raster (if path)
   if (!base::inherits(rast, "SpatRaster")) rast <- terra::rast(rast)

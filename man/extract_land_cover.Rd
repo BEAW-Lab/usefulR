@@ -15,7 +15,7 @@ extract_land_cover(coords, radius_m, cat_vals = c(50), value_scale = 100)
 
 \item{value_scale}{numeric: if fractional values are 0-100 set to 100; default 1 (0-1)}
 
-\item{rast}{terra raster}
+\item{raster_lc}{terra raster}
 
 \item{type}{"categorical"}
 }

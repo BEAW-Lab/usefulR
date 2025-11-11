@@ -19,6 +19,9 @@ Depends: R (>= 3.4.0),
 	  sf,
     stats,
   	terra
+Suggests:
+    knitr
+    rmarkdown
 VignetteBuilder:
     knitr
 LazyData: true
