@@ -45,7 +45,8 @@ uses [ESA WorldCover 2021 data](https://worldcover2021.esa.int/).
 The function can be applied to one set of coordinates (bundled in a data frame):
 ```{r urban score single pair of coordenates, include = T}
 extract_land_cover(coords = data.frame(lon = -3.50, lat = 42.00), # (longitude, latitude) the order is important
-                    radius_m = 1500,        # buffer radius in meters
+                    raster_lc,
+                   radius_m = 1500,        # buffer radius in meters
                     cat_vals = c(50))       # categorical value for the land cover of interest. '50' for impervious surface in the ESA WorldCover dataset.
 
 ```
@@ -53,6 +54,7 @@ extract_land_cover(coords = data.frame(lon = -3.50, lat = 42.00), # (longitude, 
 and, it can also be applied to a set of multiple pairs of coordinates. In the code below, we calculate the proportion of impervious surface for the data set we simulated above:
 ```{r urban score single , include = T}
 data_land_cover <- extract_land_cover(coords = coor %>% select(lon, lat), 
+                                      raster_lc,
                                       radius_m = 1500, 
                                       cat_vals = c(50))
 head(data_land_cover)

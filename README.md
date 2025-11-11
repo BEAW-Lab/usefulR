@@ -9,5 +9,13 @@ If you find a problem or would like to add or improve a function, create a [pull
 ```{r eval = F}
 # install.packages("pak")
 pak::pkg_install("BEAW-Lab/usefulR")
-
 ```
+
+# Usage
+After installation, you can use the functions in this package as any other R package. If you like, you can load the package using:
+```{r eval = F}
+library(usefulR)
+```
+
+We have written a vignette to help you use the functions contained in this package. Follow this tutorial here. Get in touch if anything is unclear and we
+will try to polish both the functions and the tutorial in the vignette.

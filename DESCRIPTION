@@ -1,8 +1,8 @@
 Package: usefulR
 Type: Package
 Title: Useful R functions for BEAW Research Group
-Version: 0.0.1
-Date: 2025-10-03
+Version: 0.0.2
+Date: 2025-11-11
 Authors@R: person ("Pablo", "Capilla-Lasheras", email="pacapilla@gmail.com", role=c("aut",
     "cre"))
 Author: Pablo Capilla-Lasheras [aut, cre]
@@ -13,12 +13,12 @@ Depends: R (>= 3.4.0),
     base,
     broom,
     dplyr,
-	exactextractr,
+	  exactextractr,
     gt,
     gtsummary,
-	sf,
+	  sf,
     stats,
-	terra
+  	terra
 VignetteBuilder:
     knitr
 LazyData: true

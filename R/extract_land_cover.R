@@ -8,7 +8,7 @@
 #' For more information on the land cover data use here, check: https://worldcover2021.esa.int/
 #'
 #' @param coords  data.frame or matrix with columns lon, lat (WGS84)
-#' @param rast terra raster
+#' @param raster_lc terra raster
 #' @param radius_m numeric buffer radius in meters
 #' @param type    "categorical"
 #' @param cat_vals integer vector of raster values to consider 'impervious' (only for categorical) (cat_vals = 50 for impervious surface)
@@ -16,9 +16,10 @@
 #' @return data.frame with lon, lat, radius_m, percent_impervious (0-100)
 #' @export
 extract_land_cover <- function(coords, radius_m, 
+                               raster_lc,
                                 cat_vals = c(50), # this is the value for impervious surface
                                 value_scale = 100) {
-  rast <- terra::rast('./data/LC_raster.tif')
+  rast <- raster_lc
   
   # Read raster (if path)
   if (!base::inherits(rast, "SpatRaster")) rast <- terra::rast(rast)
