@@ -31,7 +31,8 @@ In this vignette we will:
 To install the package:
 ```{r include = T, eval = F}
 # install.packages("pak") # install pak if not previously installed
-pak::pkg_install("BEAW-Lab/usefulR")
+pak::pkg_install("BEAW-Lab/usefulR") # or
+devtools::install_github("BEAW-Lab/usefulR")
 ```
 
 ## Simulate data
@@ -40,8 +41,8 @@ First, we simulate a set of coordinates within (roughly) the Iberian Peninsula. 
 a predictor variable.
 ```{r data simulation, include = T}
 set.seed(7)
-coor <- data.frame(lon = runif(n = 50, min = -6, max = -3),
-                   lat = runif(n = 50, min = 39, max = 42),
+coor <- data.frame(lon = runif(n = 50, min = -2, max = 0),
+                   lat = runif(n = 50, min = 42, max = 43),
                    x_var1 = rnorm(n = 50, mean = 0, sd = 5))
 head(coor)
 ```
