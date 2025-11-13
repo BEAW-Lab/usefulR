@@ -54,7 +54,7 @@ uses [ESA WorldCover 2021 data](https://worldcover2021.esa.int/).
 
 The function can be applied to one set of coordinates (bundled in a data frame):
 ```{r urban score single pair of coordenates, include = T}
-raster_path_test <- system.file("extdata", "ESA_WorldCover_10m_2021_V200_N39W006_Map.tif", package = "usefulR")
+raster_path_test <- system.file("extdata", "ESA_WorldCover_10m_2021_V200_N42W003_Map.tif", package = "usefulR")
 
 extract_land_cover(coords = data.frame(lon = -4.5, lat = 41.00), # (longitude, latitude) the order is important
                    raster_path = raster_path_test,
