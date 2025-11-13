@@ -23,42 +23,53 @@ library(usefulR)
 
 In this vignette we will:
 
-* calculate urban score using `extract_land_cover.R`
+* calculate urban score using `extract_land_cover.R` (= proportion of impervious surface around a given coordinate)
 * run a model to investigate whether urbanisation score drives variation in a trait
 * generate a publication-ready table using `table_results.R`
+
+## Installation
+To install the package:
+```{r include = T, eval = F}
+# install.packages("pak") # install pak if not previously installed
+pak::pkg_install("BEAW-Lab/usefulR")
+```
 
 ## Simulate data
 
 First, we simulate a set of coordinates within (roughly) the Iberian Peninsula. We also generate values for 
 a predictor variable.
 ```{r data simulation, include = T}
-coor <- data.frame(lon = runif(n = 50, min = -9, max = 0),
-                   lat = runif(n = 50, min = 36, max = 43),
+set.seed(7)
+coor <- data.frame(lon = runif(n = 50, min = -6, max = -3),
+                   lat = runif(n = 50, min = 39, max = 42),
                    x_var1 = rnorm(n = 50, mean = 0, sd = 5))
 head(coor)
 ```
 
 ## Calculate urban score
-Using the set of 50 coordinates that we have generated, we now calculate an urban scores using the `extract_land_cover`\
+Using the set of 50 coordinates that we have generated above, we now calculate an urban scores using the `extract_land_cover`
 function within `usefulR`. Before going ahead with the calculation, please, keep in mind that this function calculates
-(really) the proportion of impervious surface within a chosen buffer around a set of coordenates, and it 
+(actually) the proportion of impervious surface within a chosen buffer around a set of coordinates, and it 
 uses [ESA WorldCover 2021 data](https://worldcover2021.esa.int/). 
 
 The function can be applied to one set of coordinates (bundled in a data frame):
 ```{r urban score single pair of coordenates, include = T}
-extract_land_cover(coords = data.frame(lon = -3.50, lat = 42.00), # (longitude, latitude) the order is important
+raster_path_test <- system.file("extdata", "ESA_WorldCover_10m_2021_V200_N39W006_Map.tif", package = "usefulR")
+
+extract_land_cover(coords = data.frame(lon = -4.5, lat = 41.00), # (longitude, latitude) the order is important
+                   raster_path = raster_path_test,
                    radius_m = 1500,        # buffer radius in meters
-                    cat_vals = c(50))       # categorical value for the land cover of interest. '50' for impervious surface in the ESA WorldCover dataset.
+                   cat_vals = c(50))       # categorical value for the land cover of interest. '50' for impervious surface in the ESA WorldCover dataset.
 
 ```
 
 and, it can also be applied to a set of multiple pairs of coordinates. In the code below, we calculate the proportion of impervious surface for the data set we simulated above:
-```{r urban score single , include = T}
+```{r urban score, include = T}
 data_land_cover <- extract_land_cover(coords = coor %>% select(lon, lat), 
+                                      raster_path = raster_path_test,
                                       radius_m = 1500, 
                                       cat_vals = c(50))
 head(data_land_cover)
-
 ```
 You can now then merge the calculation of percent of impervious surface into the initial dataset:
 ```{r, include = T}
@@ -69,13 +80,32 @@ data <- left_join(x = coor,
 head(data)
 ```
 
+For this tutorial, we have only used a small raster that only covers part of the Iberian Peninsula. To use the complete raster, I have written a helper function that allows you to download a complete raster for analysis. Before running `extract_land_cover`, you just need to download this file once and save it in your computer (~700Mb):
+```{r, include = T, eval = FALSE}
+download_ESAWC21_raster (local_dir = 'directory/to/save/raster',  # adjust to your choice
+                                    file_name = "LC_raster.tif",  # adjust to your choice
+                                    force = FALSE)
+```
+
+Once the file is downloaded and saved, you can use it to run `extract_land_cover`:
+```{r, include = T, eval = FALSE}
+raster_esa <- rast('./path/to/directory/where/raster/is/saved')
+plot(raster_esa) # plot the raster to double check you approximately have the geographical coverage you need
+
+extract_land_cover(coords = coor %>% select(lon, lat), 
+                   raster_path = './path/to/directory/where/raster/is/saved',
+                   radius_m = 1500, 
+                   cat_vals = c(50))
+
+# once extract_land_cover runs, you can adjust the code above to merge its results to your datasest
+```
+
 ## Analyse the data and producing publication-ready tables
 
 Before we run a model and show how to generate publication-ready tables, we simulate a response variable that is explained by percentage of impervious surface. We simulate a 
-relationship between percentage of impervious and the simulated response variable with slope 3.5.
+relationship between percentage of impervious and the simulated response variable with slope 3.5. This is just to generate a dataset we can analyse and generate a table of results. The purpose of this exercise is to show how to produce a publication-ready table. The idea is to use the function below (`table_results` with your own models to generate tables that look good and can be pasted to reports and manuscripts).
 ```{r simulate response, include = T}
-data$response <- 3.5 * data$percent_impervious + rnorm(n = nrow(data), mean = 0, sd = 5)
-
+data$response <- 3.5 * data$percent_impervious + rnorm(n = nrow(data), mean = 0, sd = 15)
 ```
 
 Now we run the model to explain variation in the response variable including `percent_impervious` and `x_var1` as fixed effects.
@@ -85,7 +115,7 @@ summary(model)
 ```
 
 Once we have the model, we can produce a table of results with `table_results`:
-```{r table of results, include = T}
+```{r table of results, include = T, eval = T}
 table_results(
   label_list = list(
     `(Intercept)` = "Intercept",
@@ -98,7 +128,7 @@ table_results(
 The code above renders the table in this vignette. You can also save the table to an R object and save it in your `./tables/` folder within your 
 working directory:
 ```{r save table, include = T, eval = F}
-table01<- table_results(
+table01 <- table_results(
   label_list = list(
     `(Intercept)` = "Intercept",
     `x_var1` = "x_var1",

@@ -4,20 +4,24 @@
 \alias{extract_land_cover}
 \title{This function calculate proportion of impervious surface (or any other habitat type) given a set of coordinates}
 \usage{
-extract_land_cover(coords, radius_m, cat_vals = c(50), value_scale = 100)
+extract_land_cover(
+  coords,
+  raster_path,
+  radius_m,
+  cat_vals = c(50),
+  value_scale = 100
+)
 }
 \arguments{
 \item{coords}{data.frame or matrix with columns lon, lat (WGS84)}
+
+\item{raster_path}{path to terra raster of your choice}
 
 \item{radius_m}{numeric buffer radius in meters}
 
 \item{cat_vals}{integer vector of raster values to consider 'impervious' (only for categorical) (cat_vals = 50 for impervious surface)}
 
 \item{value_scale}{numeric: if fractional values are 0-100 set to 100; default 1 (0-1)}
-
-\item{raster_lc}{terra raster}
-
-\item{type}{"categorical"}
 }
 \value{
 data.frame with lon, lat, radius_m, percent_impervious (0-100)

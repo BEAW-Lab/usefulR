@@ -16,9 +16,11 @@ Depends: R (>= 3.4.0),
 	  exactextractr,
     gt,
     gtsummary,
+    rappdirs,
 	  sf,
     stats,
-  	terra
+  	terra,
+  	utils
 Suggests:
     knitr,
     rmarkdown
