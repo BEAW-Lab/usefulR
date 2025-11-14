@@ -24,6 +24,7 @@ library(usefulR)
 In this vignette we will:
 
 * calculate urban score using `extract_land_cover.R` (= proportion of impervious surface around a given coordinate)
+* calculate amount of artificial light at night from VIIRS datasets
 * run a model to investigate whether urbanisation score drives variation in a trait
 * generate a publication-ready table using `table_results.R`
 
@@ -32,11 +33,10 @@ To install the package:
 ```{r include = T, eval = F}
 # install.packages("pak") # install pak if not previously installed
 pak::pkg_install("BEAW-Lab/usefulR") # or
-devtools::install_github("BEAW-Lab/usefulR")
+devtools::install_github("BEAW-Lab/usefulR", build_vignettes = TRUE)
 ```
 
 ## Simulate data
-
 First, we simulate a set of coordinates within (roughly) the Iberian Peninsula. We also generate values for 
 a predictor variable.
 ```{r data simulation, include = T}
@@ -47,7 +47,7 @@ coor <- data.frame(lon = runif(n = 50, min = -6, max = -3),
 head(coor)
 ```
 
-## Calculate urban score
+## Calculate urban score from land cover data
 Using the set of 50 coordinates that we have generated above, we now calculate an urban scores using the `extract_land_cover`
 function within `usefulR`. Before going ahead with the calculation, please, keep in mind that this function calculates
 (actually) the proportion of impervious surface within a chosen buffer around a set of coordinates, and it 
@@ -110,6 +110,22 @@ extract_land_cover(coords = coor %>% select(lon, lat),
                    cat_vals = c(50))
 
 # once extract_land_cover runs, you can adjust the code above to merge its results to your datasest
+```
+
+## Calculate artificial light at night
+With the same philosophy than the function above to calculate % of impervious surface, the function `extract_alan` allows you to calculate the amount of 
+artificial light at night around a given location. First, also following the rationale presented above, you can download a VIIRS dataset (
+from June 2025) to use as input data in the calculation: (note that the file is approximately 2GB in size, so the download might take a while)
+```{r, include = T, eval = FALSE}
+# do this step only once and keep the data saved in your computer
+download_viirsJune25_raster(local_dir = './viirs_data',
+                                        file_name = "VIIRS_June2025.tif",
+                                        force = FALSE) 
+```
+Now, we can use the downloaded data to calculate amount of artificial light at night using `extract_alan`
+```{r, include = T, eval = FALSE}
+extract_alan
+
 ```
 
 ## Analyse the data and producing publication-ready tables

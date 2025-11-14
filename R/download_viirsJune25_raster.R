@@ -1,7 +1,8 @@
-#' Download ESA WorldCover 2021 data
+#' Download VIIRS Nighttime Lights data (https://eogdata.mines.edu/products/vnl/) to use in the calculation of amount of artificial light at night.
+#' The downloaded file includes global data from June 2025.
 #'
 #' @description
-#' This helper function downloads a land cover raster from ESA WorldCover 2021.
+#' This helper function downloads VIIRS Nighttime Lights data from June 2025.
 #' It stores it locally, so it needs to be downloaded only once.
 #'
 #' @param local_dir Path to directory where the file should be saved.
@@ -15,9 +16,9 @@
 #' TBC
 #' }
 #' @export
-download_ESAWC21_raster <- function(local_dir = NULL,
-                                    file_name = "LC_raster.tif",
-                                    force = FALSE) {
+download_viirsJune25_raster <- function(local_dir = NULL,
+                                        file_name = "VIIRS_June2025.tif",
+                                        force = FALSE) {
   requireNamespace("utils")
   requireNamespace("rappdirs")
   
@@ -30,7 +31,7 @@ download_ESAWC21_raster <- function(local_dir = NULL,
   options(timeout = max(600, getOption("timeout")))
   
   # --- Remote source (Dropbox direct link) ---
-  url <- "https://www.dropbox.com/scl/fi/kt47lhz9eta3g77x03m20/ESA21_WLC_raster.tif?rlkey=4w3fzk50t966tk7a2klciz3o2&dl=1"
+  url <- "https://www.dropbox.com/scl/fi/kipt8s5hr23ozurhl416s/VNL_npp_2024_global_vcmslcfg_v2_c202502261200.average_masked.dat.tif?rlkey=g38yht4a8aur73pdftjk1vfva&dl=1"
   
   # --- Determine where to store file ---
   if (is.null(local_dir)) {
@@ -43,7 +44,7 @@ download_ESAWC21_raster <- function(local_dir = NULL,
   
   # --- Download if missing or forced ---
   if (!file.exists(local_file) || force) {
-    message("Downloading ", file_name, " (~1.5 GB)... please wait.")
+    message("Downloading ", file_name, " (~12 GB)... please wait.")
     tryCatch({
       utils::download.file(url, destfile = local_file, mode = "wb", quiet = FALSE)
       message("✅ Download complete. File saved to: ", normalizePath(local_file))
@@ -56,8 +57,8 @@ download_ESAWC21_raster <- function(local_dir = NULL,
   
   # --- Verify download integrity ---
   size <- file.info(local_file)$size
-  if (is.na(size) || size < 1500e6) {
-    warning("File may be incomplete (size < 1.5 GB). Try re-downloading with force = TRUE.")
+  if (is.na(size) || size < 10000e6) {
+    warning("File may be incomplete (size < 10 GB). Try re-downloading with force = TRUE.")
   }
   
   return(local_file)

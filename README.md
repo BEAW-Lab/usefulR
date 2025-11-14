@@ -8,7 +8,7 @@ If you find a problem or would like to add or improve a function, create a [pull
 # Installation
 ```{r eval = F}
 # install.packages("pak")
-pak::pkg_install("BEAW-Lab/usefulR")
+pak::pkg_install("BEAW-Lab/usefulR", )
 ```
 
 # Usage
