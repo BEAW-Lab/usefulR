@@ -4,7 +4,7 @@ author: "Pablo Capilla-Lasheras"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{usefulR in action: an example to use its functions}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
@@ -56,9 +56,17 @@ uses [ESA WorldCover 2021 data](https://worldcover2021.esa.int/).
 The function can be applied to one set of coordinates (bundled in a data frame):
 ```{r urban score single pair of coordenates, include = T}
 # we first download a raster to run the example below. download_ESAWC21_raster_vignette() downloads an example raster that is then stored locally
-download_ESAWC21_raster_vignette(force = TRUE)
-# path_to_raster <- './data_vignette/LC_raster_example.tif' # if run from main working directory. Name of the downloaded file
-path_to_raster <- '../data_vignette/LC_raster_example.tif' # if the vignette is built. Name of the downloaded file
+vignette_dir <- tempdir()
+
+# download file INTO THIS directory
+download_ESAWC21_raster_vignette(
+  local_dir = vignette_dir,
+  file_name = "LC_raster_example.tif",
+  force = TRUE
+)
+
+# Build the final path
+path_to_raster <- file.path(vignette_dir, "LC_raster_example.tif")
 
 extract_land_cover(coords = data.frame(lon = -4.5, lat = 41.00), # (longitude, latitude) the order is important
                    raster_path = path_to_raster,  # if the vignette is built. Name of the downloaded file
