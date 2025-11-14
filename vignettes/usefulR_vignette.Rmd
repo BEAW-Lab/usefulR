@@ -41,8 +41,8 @@ First, we simulate a set of coordinates within (roughly) the Iberian Peninsula. 
 a predictor variable.
 ```{r data simulation, include = T}
 set.seed(7)
-coor <- data.frame(lon = runif(n = 50, min = -2, max = 0),
-                   lat = runif(n = 50, min = 42, max = 43),
+coor <- data.frame(lon = runif(n = 50, min = -6, max = -3),
+                   lat = runif(n = 50, min = 39, max = 42),
                    x_var1 = rnorm(n = 50, mean = 0, sd = 5))
 head(coor)
 ```
@@ -55,10 +55,13 @@ uses [ESA WorldCover 2021 data](https://worldcover2021.esa.int/).
 
 The function can be applied to one set of coordinates (bundled in a data frame):
 ```{r urban score single pair of coordenates, include = T}
-raster_path_test <- system.file("extdata", "ESA_WorldCover_10m_2021_V200_N42W003_Map.tif", package = "usefulR")
+# we first download a raster to run the example below. download_ESAWC21_raster_vignette() downloads an example raster that is then stored locally
+download_ESAWC21_raster_vignette(force = TRUE)
+# path_to_raster <- './data_vignette/LC_raster_example.tif' # if run from main working directory. Name of the downloaded file
+path_to_raster <- '../data_vignette/LC_raster_example.tif' # if the vignette is built. Name of the downloaded file
 
 extract_land_cover(coords = data.frame(lon = -4.5, lat = 41.00), # (longitude, latitude) the order is important
-                   raster_path = raster_path_test,
+                   raster_path = path_to_raster,  # if the vignette is built. Name of the downloaded file
                    radius_m = 1500,        # buffer radius in meters
                    cat_vals = c(50))       # categorical value for the land cover of interest. '50' for impervious surface in the ESA WorldCover dataset.
 
@@ -67,7 +70,7 @@ extract_land_cover(coords = data.frame(lon = -4.5, lat = 41.00), # (longitude, l
 and, it can also be applied to a set of multiple pairs of coordinates. In the code below, we calculate the proportion of impervious surface for the data set we simulated above:
 ```{r urban score, include = T}
 data_land_cover <- extract_land_cover(coords = coor %>% select(lon, lat), 
-                                      raster_path = raster_path_test,
+                                      raster_path = path_to_raster,
                                       radius_m = 1500, 
                                       cat_vals = c(50))
 head(data_land_cover)
