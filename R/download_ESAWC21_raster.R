@@ -43,7 +43,7 @@ download_ESAWC21_raster <- function(local_dir = NULL,
   
   # --- Download if missing or forced ---
   if (!file.exists(local_file) || force) {
-    message("Downloading ", file_name, " (~1.5 GB)... please wait.")
+    message("Downloading ", file_name, " (~1.8 GB)... please wait.")
     tryCatch({
       utils::download.file(url, destfile = local_file, mode = "wb", quiet = FALSE)
       message("✅ Download complete. File saved to: ", normalizePath(local_file))
@@ -56,8 +56,8 @@ download_ESAWC21_raster <- function(local_dir = NULL,
   
   # --- Verify download integrity ---
   size <- file.info(local_file)$size
-  if (is.na(size) || size < 1500e6) {
-    warning("File may be incomplete (size < 1.5 GB). Try re-downloading with force = TRUE.")
+  if (is.na(size) || size < 1800e6) {
+    warning("File may be incomplete (size < 1.8 GB). Try re-downloading with force = TRUE.")
   }
   
   return(local_file)

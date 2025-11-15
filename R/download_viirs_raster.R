@@ -91,7 +91,7 @@ download_viirs_raster <- function(local_dir = NULL,
   # --- File integrity check (for cropped Europe raster) ---
   size <- file.info(local_file)$size
   
-  if (is.na(size) || size < 40e6) {  # Europe crop will be ~50–150 MB
+  if (is.na(size) || size < 40e6) {  # Europe crop is 441 MB
     warning("⚠ Saved raster is unexpectedly small. Something may have gone wrong.")
   }
   
