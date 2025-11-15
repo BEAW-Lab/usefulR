@@ -118,9 +118,9 @@ artificial light at night around a given location. First, also following the rat
 from June 2025) to use as input data in the calculation: (note that the file is approximately 2GB in size, so the download might take a while)
 ```{r, include = T, eval = FALSE}
 # do this step only once and keep the data saved in your computer
-download_viirsJune25_raster(local_dir = './viirs_data',
-                                        file_name = "VIIRS_June2025.tif",
-                                        force = FALSE) 
+download_viirsJune25_raster(local_dir = './viirs_data',      # put the directory where you want to save the file
+                            file_name = "VIIRS_June2025.tif",# adjust to the name you want to give to the file
+                            force = FALSE) 
 ```
 Now, we can use the downloaded data to calculate amount of artificial light at night using `extract_alan`
 ```{r, include = T, eval = FALSE}

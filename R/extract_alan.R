@@ -1,31 +1,17 @@
 #' This function calculates artificial light at night around a set of coordinates
 #' 
 #' @description
-#' Function to extract artificial light at night around a set of coordinates.
+#' Function to extract artificial light at night around a set of coordinates. The units of the output will
+#' be determined by the ALAN units in the input raster.
 #'
 #' @param coords  data.frame or matrix with columns lon, lat (WGS84)
-#' @param raster_path path to terra raster of your choice
+#' @param raster_path path to tif raster of your choice
 #' @param radius_m numeric buffer radius in meters
-#' @param cat_vals integer vector of raster values to consider 'impervious' (only for categorical) (cat_vals = 50 for impervious surface)
-#' @param value_scale numeric: if fractional values are 0-100 set to 100; default 1 (0-1)
-#' @return data.frame with lon, lat, radius_m, percent_impervious (0-100)
+#' @return data.frame with lon, lat, radius_m, alan in natural scale and log scale
 #' @export
-
-coords <- c(-1,  42)
-raster_path <- "./viirs_data/VIIRS_June2025.tif"
-radius_m <- 1500
-cat_vals = c(50), # this is the value for impervious surface
-value_scale = 100
-
-
-rast_viirs <- rast(raster_path)
-plot(rast_viirs)
-
 extract_alan <- function(coords, 
-                               raster_path,
-                               radius_m, 
-                               cat_vals = c(50), # this is the value for impervious surface
-                               value_scale = 100) {
+                         raster_path,
+                         radius_m) {
   
   # access raster data
   rast <- terra::rast(raster_path)
@@ -55,28 +41,39 @@ extract_alan <- function(coords,
     
     ex <- exactextractr::exact_extract(rast, poly, include_cell = FALSE, progress = FALSE)[[1]]
     
-    if (base::is.null(ex) || base::nrow(ex) == 0) {
-      return(base::data.frame(percent_impervious = 'NA_real_'))
+    if (is.null(ex) || nrow(ex) == 0) {
+      return(data.frame(
+        alan = NA_real_,
+        alan_log = NA_real_
+      ))
     }
     
-    # actual calculation of %
-    is_imp <- ex$value %in% cat_vals
-    cov    <- ex$coverage_fraction
-    percent <- base::sum(cov[is_imp], na.rm = TRUE) / base::sum(cov, na.rm = TRUE) * 100
-    return(base::data.frame(percent_impervious = percent))
+    alan <- sum(ex$value * ex$coverage_fraction, na.rm = TRUE) /
+      sum(ex$coverage_fraction, na.rm = TRUE)
+    
+    # Area-weighted mean log10(ALAN + 1)
+    alan_log <- sum(log10(ex$value + 1) * ex$coverage_fraction, na.rm = TRUE) /
+      sum(ex$coverage_fraction, na.rm = TRUE)
+    
+    data.frame(
+      alan = alan,
+      alan_log = alan_log
+    )
   })
   
-  res_df <- dplyr::bind_rows(results)
-  out <- base::cbind(
-    sf::st_drop_geometry(pts)[, c("lon", "lat", 
-                                  base::setdiff(base::names(sf::st_drop_geometry(pts)), c("lon", "lat")))],
+  # --- Bind results ---
+  results_df <- dplyr::bind_rows(results)
+  
+  # --- Final output ---
+  out <- cbind(
+    lon = coords$lon,
+    lat = coords$lat,
     radius_m = radius_m,
-    res_df
+    results_df
   )
   
   return(out)
 }
-
 
 
 

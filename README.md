@@ -7,8 +7,8 @@ If you find a problem or would like to add or improve a function, create a [pull
 
 # Installation
 ```{r eval = F}
-# install.packages("pak")
-pak::pkg_install("BEAW-Lab/usefulR", )
+# install.packages("devtools")
+devtools::install_github("BEAW-Lab/usefulR", build_vignettes = TRUE)
 ```
 
 # Usage
@@ -17,5 +17,10 @@ After installation, you can use the functions in this package as any other R pac
 library(usefulR)
 ```
 
-We have written a vignette to help you use the functions contained in this package. Follow this tutorial here. Get in touch if anything is unclear and we
+There is a vignette that you can inspect and follow as a tutorial, to access the vignette, run:
+```{r eval = F}
+Vignettebrowaser(usefulR)
+```
+
+Get in touch if anything is unclear and we
 will try to polish both the functions and the tutorial in the vignette.
