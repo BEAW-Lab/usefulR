@@ -9,17 +9,14 @@ extract_alan(coords, raster_path, radius_m)
 \arguments{
 \item{coords}{data.frame or matrix with columns lon, lat (WGS84)}
 
-\item{raster_path}{path to terra raster of your choice}
+\item{raster_path}{path to tif raster of your choice}
 
 \item{radius_m}{numeric buffer radius in meters}
-
-\item{cat_vals}{integer vector of raster values to consider 'impervious' (only for categorical) (cat_vals = 50 for impervious surface)}
-
-\item{value_scale}{numeric: if fractional values are 0-100 set to 100; default 1 (0-1)}
 }
 \value{
-data.frame with lon, lat, radius_m, percent_impervious (0-100)
+data.frame with lon, lat, radius_m, alan in natural scale and log scale
 }
 \description{
-Function to extract artificial light at night around a set of coordinates.
+Function to extract artificial light at night around a set of coordinates. The units of the output will
+be determined by the ALAN units in the input raster.
 }
