@@ -33,7 +33,7 @@ To install the package:
 ```{r include = T, eval = F}
 # install.packages("pak") # install pak if not previously installed
 pak::pkg_install("BEAW-Lab/usefulR") # or
-devtools::install_github("BEAW-Lab/usefulR", build_vignettes = TRUE)
+devtools::install_github("BEAW-Lab/usefulR", build_vignettes = TRUE, force = TRUE)
 ```
 
 ## Simulate data
@@ -148,7 +148,7 @@ head(data)
 
 ```
 
-## Analyse the data and producing publication-ready tables
+## Analyse the data and produce publication-ready tables
 Before we run a model and show how to generate publication-ready tables, we simulate a response variable that is explained by percentage of impervious surface (but not 'x_var1' or 'alan'. We simulate a 
 relationship between percentage of impervious and the simulated response variable with slope 3.5. This is just to generate a dataset that we can analyse and generate a table of results but the results are meaningless. The purpose of this exercise is to show how to produce a publication-ready table. The idea is to use the function below (`table_results` with your own models to generate tables that look good and can be pasted to reports and manuscripts).
 ```{r simulate response, include = T}
