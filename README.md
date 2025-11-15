@@ -19,7 +19,7 @@ library(usefulR)
 
 There is a vignette that you can inspect and follow as a tutorial, to access the vignette, run:
 ```{r eval = F}
-Vignettebrowaser(usefulR)
+browseVignettes("usefulR")
 ```
 
 Get in touch if anything is unclear and we
