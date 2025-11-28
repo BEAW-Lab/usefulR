@@ -137,6 +137,7 @@ extract_era5 <- function(start_date,
       request  = request,
       transfer = TRUE,
       path   = temp_dir,
+      time_out = 36000
     )
 
     # expected path to the nc we asked for
