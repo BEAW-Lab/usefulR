@@ -2,9 +2,10 @@
 
 export(download_ESAWC21_raster)
 export(download_ESAWC21_raster_vignette)
+export(download_era5)
 export(download_viirs_raster)
 export(drop1_output)
 export(extract_alan)
-export(extract_era5)
 export(extract_land_cover)
+export(summarise_era5)
 export(table_results)

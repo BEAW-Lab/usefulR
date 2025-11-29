@@ -170,9 +170,3 @@ summarise_era5 <- function(path = "era5_downloads",
 #rownames(out) <- NULL
 #return(out)
 #
-
-
-
-
-# final object
-return(results)
