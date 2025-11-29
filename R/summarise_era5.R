@@ -67,8 +67,8 @@
 #'
 #' @export
 summarise_era5 <- function(path = "era5_downloads",
-                           variables = NULL,
-                           fun = mean,
+                           variable = NULL,
+                           summarise_fun = mean,
                            ...) {
   
   requireNamespace("terra", quietly = TRUE)
@@ -105,68 +105,33 @@ summarise_era5 <- function(path = "era5_downloads",
     
     r <- terra::rast(f)
     
-    # Select only variables requested
-    if (!is.null(variables)) {
-      missing_vars <- setdiff(variables, names(r))
-      if (length(missing_vars) > 0)
-        warning("Variables not found in ", f, ": ",
-                paste(missing_vars, collapse = ", "))
-      
-      r <- r[[intersect(variables, names(r))]]
-    }
+    # extract and summarise data
+    extracted <- terra::extract(r, data.frame(lon = coords$lon, lat = coords$lat))
     
-    # Apply summarising function to each layer
-    vals <- purrr::map_dbl(names(r), function(v) {
-      fun(terra::values(r[[v]]), ...)  # allows na.rm = TRUE, etc.
-    })
+    ## drop ID column
+    values <- extracted[, -1, drop = FALSE]
+    summary_values <- summarise_fun(as.numeric(values), na.rm = TRUE)
+    
     
     data.frame(
       lat = coords$lat,
       lon = coords$lon,
-      t(vals)
+      value = summary_values
     )
   })
   
   # Combine into a single data frame
   results <- dplyr::bind_rows(result_list)
   
-  # Convert temperature variables from Kelvin to Celsius
-  kelvin_vars <- c("t2m", "2m_temperature")
+  # adjust column name
+  out <- results
+  names(out)[names(out) == "value"] <- variable
   
-  for (kv in kelvin_vars) {
-    if (kv %in% names(results)) {
-      results[[kv]] <- results[[kv]] - 273.00
-    }
+  # Convert temperature variables from Kelvin to Celsius
+  if (variable %in% c("t2m", "2m_temperature", "2m_temp")) {
+    out[[variable]] <- out[[variable]] - 273.15
   }
   
-  return(results)
+  return(out)
   
 }
-
-
-
-
-## expected path to the nc we asked for
-#expected_nc <- paste0(temp_dir, "/", out_file)
-#
-## read the (one or many) netcdf(s)
-#r <- terra::rast(expected_nc)
-#
-## extract values at the single point (returns 1 row)
-#extracted <- terra::extract(r, data.frame(lon = lon, lat = lat))
-#
-## drop ID column
-#values <- extracted[, -1, drop = FALSE]
-#summary_values <- apply(values, 1, summarise_fun, na.rm = TRUE) 
-#
-## Build final output data.frame: one column per variable (group)
-#out <- data.frame(
-#  start_date = start_date,
-#  end_date = end_date,
-#  lat = lat,
-#  lon = lon)
-#
-#out <- dplyr::tibble(out, !!variables := summary_values)
-#rownames(out) <- NULL
-#return(out)
-#

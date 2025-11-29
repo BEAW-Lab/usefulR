@@ -4,11 +4,19 @@
 \alias{summarise_era5}
 \title{Summarise ERA5 Point Data from Downloaded NetCDF Files}
 \usage{
-summarise_era5(path = "era5_downloads", variables = NULL, fun = mean, ...)
+summarise_era5(
+  path = "era5_downloads",
+  variable = NULL,
+  summarise_fun = mean,
+  ...
+)
 }
 \arguments{
 \item{path}{Character. Directory containing the NetCDF files.
 Defaults to \code{"era5_downloads"}.}
+
+\item{...}{Additional arguments passed to \code{fun}
+(e.g., \code{na.rm = TRUE}).}
 
 \item{variables}{Optional character vector specifying which ERA5
 variables to summarise. If \code{NULL} (default), all variables
@@ -18,9 +26,6 @@ present in each NetCDF file are summarised.}
 of each variable (e.g., \code{mean}, \code{sum}, \code{sd},
 or a user-defined custom function).
 Defaults to \code{mean}.}
-
-\item{...}{Additional arguments passed to \code{fun}
-(e.g., \code{na.rm = TRUE}).}
 }
 \value{
 A data frame where each row corresponds to one NetCDF file
