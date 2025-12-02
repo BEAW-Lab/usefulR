@@ -4,8 +4,8 @@ author: "Pablo Capilla-Lasheras"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{usefulR in action: an example to use its functions}
   %\VignetteEncoding{UTF-8}
+  %\VignetteIndexEntry{usefulR in action: an example to use its functions}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
   chunk_output_type: console

@@ -1,7 +1,7 @@
 Package: usefulR
 Type: Package
 Title: Useful R functions for BEAW Research Group
-Version: 0.0.4
+Version: 0.0.5
 Date: 2025-11-25
 Authors@R: person ("Pablo", "Capilla-Lasheras", email="pacapilla@gmail.com", role=c("aut",
     "cre"))
