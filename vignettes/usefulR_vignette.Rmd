@@ -132,9 +132,9 @@ If you want to use CORINE Land Cover instead, provide a CORINE raster and set `d
 By default the function will treat artificial-surface classes (111, 112, 121, 122, 123, 124, 131, 132, 133, 141, 142)
 as urban land cover:
 ```{r, include = T, eval = FALSE}
-# first download the official CORINE raster using your CLMS service key
+# first download the official CORINE raster using the path to your CLMS service-key JSON file
 usefulR::download_corine_raster(
-  token = Sys.getenv("CLMS_BEARER_TOKEN"),
+  token = Sys.getenv("CLMS_SERVICE_KEY_FILE"),
   local_dir = "./data"
 )
 

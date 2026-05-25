@@ -8,18 +8,21 @@
 #' The function accepts either:
 #' \itemize{
 #'   \item a short-lived CLMS API bearer access token, or
-#'   \item the full CLMS service-key JSON used to mint that access token.
+#'   \item the full CLMS service-key JSON used to mint that access token, or
+#'   \item a path to a JSON file containing that CLMS service key.
 #' }
 #'
-#' If a service-key JSON is supplied, the function automatically creates a JWT,
-#' exchanges it at the CLMS \code{@@oauth2-token} endpoint, and then uses the
-#' returned bearer token for the download request.
+#' If a service-key JSON or a path to a service-key JSON file is supplied, the
+#' function automatically creates a JWT, exchanges it at the CLMS
+#' \code{@@oauth2-token} endpoint, and then uses the returned bearer token for
+#' the download request.
 #'
 #' Instructions to create a CLMS service key are available at
 #' \url{https://eea.github.io/clms-api-docs/authentication.html}.
 #'
-#' @param token Character. Either a CLMS API bearer access token or the full
-#'   CLMS service-key JSON string.
+#' @param token Character. Either a CLMS API bearer access token, the full CLMS
+#'   service-key JSON string, or a path to a JSON file containing the CLMS
+#'   service key.
 #' @param local_dir Path to directory where the file should be saved.
 #'   If \code{NULL} (default), a system cache directory is used.
 #' @param file_name Desired name for the downloaded file (e.g. \code{"CLC_CORINE_2018.tif"}).
@@ -35,7 +38,7 @@
 #' @examples
 #' \dontrun{
 #' download_corine_raster(
-#'   token = Sys.getenv("CLMS_BEARER_TOKEN"),
+#'   token = Sys.getenv("CLMS_SERVICE_KEY_FILE"),
 #'   local_dir = "data"
 #' )
 #' }
@@ -60,7 +63,7 @@ download_corine_raster <- function(
     !is.character(token) || length(token) != 1L || is.na(token) || token == ""
   ) {
     stop(
-      "`token` must be a single non-empty CLMS access token or service-key JSON. ",
+      "`token` must be a single non-empty CLMS access token, service-key JSON, or path to a service-key JSON file. ",
       "See https://eea.github.io/clms-api-docs/authentication.html",
       call. = FALSE
     )
@@ -91,6 +94,10 @@ download_corine_raster <- function(
 
   resolve_access_token <- function(token_value) {
     trimmed <- trimws(token_value)
+    
+    if (file.exists(trimmed)) {
+      trimmed <- paste(readLines(trimmed, warn = FALSE), collapse = "\n")
+    }
 
     if (grepl("^\\{", trimmed)) {
       service_key <- jsonlite::fromJSON(trimmed, simplifyVector = TRUE)
