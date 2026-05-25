@@ -5,10 +5,21 @@
 #' 2018 raster from the Copernicus Land Monitoring Service (CLMS) API, waits
 #' until the download is ready, and saves the main Europe GeoTIFF locally.
 #'
-#' The function requires a CLMS API bearer token. Instructions to create one
-#' are available at \url{https://eea.github.io/clms-api-docs/authentication.html}.
+#' The function accepts either:
+#' \itemize{
+#'   \item a short-lived CLMS API bearer access token, or
+#'   \item the full CLMS service-key JSON used to mint that access token.
+#' }
 #'
-#' @param token Character. CLMS API bearer token.
+#' If a service-key JSON is supplied, the function automatically creates a JWT,
+#' exchanges it at the CLMS \code{@@oauth2-token} endpoint, and then uses the
+#' returned bearer token for the download request.
+#'
+#' Instructions to create a CLMS service key are available at
+#' \url{https://eea.github.io/clms-api-docs/authentication.html}.
+#'
+#' @param token Character. Either a CLMS API bearer access token or the full
+#'   CLMS service-key JSON string.
 #' @param local_dir Path to directory where the file should be saved.
 #'   If \code{NULL} (default), a system cache directory is used.
 #' @param file_name Desired name for the downloaded file (e.g. \code{"CLC_CORINE_2018.tif"}).
@@ -38,12 +49,14 @@ download_corine_raster <- function(token,
                                    keep_zip = FALSE) {
   requireNamespace("curl", quietly = TRUE)
   requireNamespace("jsonlite", quietly = TRUE)
+  requireNamespace("jose", quietly = TRUE)
+  requireNamespace("openssl", quietly = TRUE)
   requireNamespace("rappdirs", quietly = TRUE)
   requireNamespace("utils", quietly = TRUE)
   
   if (!is.character(token) || length(token) != 1L || is.na(token) || token == "") {
     stop(
-      "`token` must be a single non-empty CLMS API bearer token. ",
+      "`token` must be a single non-empty CLMS access token or service-key JSON. ",
       "See https://eea.github.io/clms-api-docs/authentication.html",
       call. = FALSE
     )
@@ -72,12 +85,81 @@ download_corine_raster <- function(token,
   corine_dataset_id <- "0407d497d3c44bcd93ce8fd5bf78596a"
   corine_file_id <- "3d9e2413-46ca-4f6e-abf8-b6eb429a4e48"
   
+  resolve_access_token <- function(token_value) {
+    trimmed <- trimws(token_value)
+    
+    if (grepl("^\\{", trimmed)) {
+      service_key <- jsonlite::fromJSON(trimmed, simplifyVector = TRUE)
+      
+      required_fields <- c("client_id", "private_key", "token_uri", "user_id")
+      missing_fields <- setdiff(required_fields, names(service_key))
+      if (length(missing_fields) > 0L) {
+        stop(
+          "The CLMS service-key JSON is missing required fields: ",
+          paste(missing_fields, collapse = ", "),
+          call. = FALSE
+        )
+      }
+      
+      now_unix <- as.integer(Sys.time())
+      claim_set <- list(
+        iss = service_key$client_id,
+        sub = service_key$user_id,
+        aud = service_key$token_uri,
+        iat = now_unix,
+        exp = now_unix + 3600L
+      )
+      
+      private_key <- openssl::read_key(textConnection(service_key$private_key))
+      jwt_assertion <- jose::jwt_encode_sig(claim = claim_set, key = private_key)
+      
+      form_handle <- curl::new_handle()
+      curl::handle_setheaders(
+        form_handle,
+        Accept = "application/json",
+        `Content-Type` = "application/x-www-form-urlencoded"
+      )
+      curl::handle_setopt(
+        form_handle,
+        post = TRUE,
+        postfields = paste0(
+          "grant_type=",
+          utils::URLencode("urn:ietf:params:oauth:grant-type:jwt-bearer", reserved = TRUE),
+          "&assertion=",
+          utils::URLencode(jwt_assertion, reserved = TRUE)
+        )
+      )
+      
+      token_response <- curl::curl_fetch_memory(service_key$token_uri, handle = form_handle)
+      token_content <- rawToChar(token_response$content)
+      
+      if (token_response$status_code >= 300) {
+        stop(
+          "CLMS token request failed [", token_response$status_code, "]: ",
+          token_content,
+          call. = FALSE
+        )
+      }
+      
+      token_json <- jsonlite::fromJSON(token_content, simplifyVector = TRUE)
+      if (is.null(token_json$access_token) || !nzchar(token_json$access_token)) {
+        stop("The CLMS token endpoint did not return an access token.", call. = FALSE)
+      }
+      
+      return(token_json$access_token)
+    }
+    
+    trimmed
+  }
+  
+  access_token <- resolve_access_token(token)
+  
   clms_request <- function(url, method = "GET", body = NULL) {
     handle <- curl::new_handle()
     curl::handle_setheaders(
       handle,
       Accept = "application/json",
-      Authorization = paste("Bearer", token)
+      Authorization = paste("Bearer", access_token)
     )
     
     if (!is.null(body)) {

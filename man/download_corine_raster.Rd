@@ -15,7 +15,8 @@ download_corine_raster(
 )
 }
 \arguments{
-\item{token}{Character. CLMS API bearer token.}
+\item{token}{Character. Either a CLMS API bearer access token or the full
+CLMS service-key JSON string.}
 
 \item{local_dir}{Path to directory where the file should be saved.
 If \code{NULL} (default), a system cache directory is used.}
@@ -43,8 +44,18 @@ This helper function requests the official pre-packaged CORINE Land Cover
 until the download is ready, and saves the main Europe GeoTIFF locally.
 }
 \details{
-The function requires a CLMS API bearer token. Instructions to create one
-are available at \url{https://eea.github.io/clms-api-docs/authentication.html}.
+The function accepts either:
+\itemize{
+\item a short-lived CLMS API bearer access token, or
+\item the full CLMS service-key JSON used to mint that access token.
+}
+
+If a service-key JSON is supplied, the function automatically creates a JWT,
+exchanges it at the CLMS \code{@@oauth2-token} endpoint, and then uses the
+returned bearer token for the download request.
+
+Instructions to create a CLMS service key are available at
+\url{https://eea.github.io/clms-api-docs/authentication.html}.
 }
 \examples{
 \dontrun{
