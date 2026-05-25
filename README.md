@@ -3,6 +3,8 @@
 Bundle of R functions in the form of an R package containing useful resources for data wrangling, visualisation, analysis and creation of publication-ready tables of results. 
 If you find a problem or would like to add or improve a function, create a [pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests).
 
+The package currently includes helpers to calculate urban land cover around coordinates from ESA WorldCover 2021 and CORINE Land Cover rasters, as well as artificial light at night from VIIRS data. It also includes download helpers for ESA WorldCover, VIIRS, and CORINE Land Cover 2018.
+
 ## **IMPORTANT**: Use our critical assessment when using these functions. Always double check that the output they produce aligns with the results of your analysis.
 
 # Installation

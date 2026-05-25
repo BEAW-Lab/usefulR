@@ -1,75 +1,107 @@
-#' This function calculate proportion of impervious surface (or any other habitat type) given a set of coordinates
-#' 
-#' @description
-#' Function to extract the proportion of land cover around a given set of coordinates. 
-#' It uses ESA WorldCover 2021 data. By default, the function loads and uses land cover data from Spain, but the function 
-#' can take data from other geographical areas, passed to the 'rast' argument.
-#' 
-#' For more information on the land cover data use here, check: https://worldcover2021.esa.int/
+#' Calculate land-cover proportions around coordinates
 #'
-#' @param coords  data.frame or matrix with columns lon, lat (WGS84)
-#' @param raster_path path to terra raster of your choice
-#' @param radius_m numeric buffer radius in meters
-#' @param cat_vals integer vector of raster values to consider 'impervious' (only for categorical) (cat_vals = 50 for impervious surface)
-#' @param value_scale numeric: if fractional values are 0-100 set to 100; default 1 (0-1)
-#' @return data.frame with lon, lat, radius_m, percent_impervious (0-100)
+#' @description
+#' Function to extract the proportion of land cover around a given set of
+#' coordinates. By default it uses ESA WorldCover 2021 class codes, but it can
+#' also work with CORINE Land Cover rasters or any other categorical land-cover
+#' raster provided by the user.
+#'
+#' For more information on the land cover datasets used here, check:
+#' \itemize{
+#'   \item ESA WorldCover 2021: https://worldcover2021.esa.int/
+#'   \item CORINE Land Cover: https://land.copernicus.eu/en/products/corine-land-cover
+#' }
+#'
+#' @param coords data.frame or matrix with columns lon, lat (WGS84)
+#' @param raster_path Path to a raster file or a \code{terra::SpatRaster}.
+#' @param radius_m Numeric buffer radius in meters.
+#' @param dataset Character string indicating which land-cover classification is
+#'   being used. Supported options are \code{"esawc21"}, \code{"corine"}, and
+#'   \code{"custom"}.
+#' @param cat_vals Integer vector of raster values to treat as the land-cover
+#'   category of interest. If \code{NULL}, dataset-specific defaults are used:
+#'   ESA WorldCover 2021 uses class \code{50} (built-up), and CORINE uses the
+#'   artificial-surface classes \code{111, 112, 121, 122, 123, 124, 131, 132,
+#'   133, 141, 142}.
+#' @return data.frame with lon, lat, radius_m, dataset, percent_land_cover, and
+#'   percent_impervious. The \code{percent_impervious} column is retained for
+#'   backwards compatibility and mirrors \code{percent_land_cover}.
 #' @export
-extract_land_cover <- function(coords, 
+extract_land_cover <- function(coords,
                                raster_path,
-                               radius_m, 
-                               cat_vals = c(50), # this is the value for impervious surface
-                               value_scale = 100) {
+                               radius_m,
+                               dataset = c("esawc21", "corine", "custom"),
+                               cat_vals = NULL) {
+  dataset <- base::match.arg(dataset)
+  coords <- base::as.data.frame(coords)
+  required_cols <- c("lon", "lat")
   
-  # access raster data
-  rast <- terra::rast(raster_path)
+  if (!base::all(required_cols %in% base::names(coords))) {
+    base::stop("`coords` must contain columns named `lon` and `lat`.", call. = FALSE)
+  }
   
-  # Read raster (if path)
-  if (!base::inherits(rast, "SpatRaster")) rast <- terra::rast(rast)
+  if (!base::is.numeric(radius_m) ||
+      base::length(radius_m) != 1L ||
+      base::is.na(radius_m) ||
+      radius_m <= 0) {
+    base::stop("`radius_m` must be a single positive number.", call. = FALSE)
+  }
   
-  # Build sf points (WGS84)
-  pts <- sf::st_as_sf(base::as.data.frame(coords), coords = c("lon", "lat"), crs = 4326, remove = FALSE)
+  if (base::is.null(cat_vals)) {
+    cat_vals <- switch(
+      dataset,
+      esawc21 = 50L,
+      corine = c(111L, 112L, 121L, 122L, 123L, 124L, 131L, 132L, 133L, 141L, 142L),
+      custom = base::stop(
+        "When `dataset = \"custom\"`, you must supply `cat_vals`.",
+        call. = FALSE
+      )
+    )
+  }
+  cat_vals <- base::as.integer(cat_vals)
   
-  # Project to a metric CRS (EPSG:3857)
+  rast <- if (base::inherits(raster_path, "SpatRaster")) {
+    raster_path
+  } else {
+    terra::rast(raster_path)
+  }
+  
+  pts <- sf::st_as_sf(coords, coords = c("lon", "lat"), crs = 4326, remove = FALSE)
   pts_m <- sf::st_transform(pts, 3857)
-  
-  # Make buffers (in meters)
   buffers_m <- sf::st_buffer(pts_m, dist = radius_m)
   
-  # Reproject buffers to raster CRS
   rast_crs <- terra::crs(rast, proj = TRUE)
   if (base::is.na(rast_crs) || rast_crs == "") {
-    base::stop("Raster has no CRS defined.")
+    base::stop("Raster has no CRS defined.", call. = FALSE)
   }
   buffers_rastcrs <- sf::st_transform(buffers_m, crs = rast_crs)
   
-  # Area-weighted summary with exactextractr
   results <- base::lapply(base::seq_len(base::nrow(buffers_rastcrs)), function(i) {
     poly <- buffers_rastcrs[i, ]
-    
     ex <- exactextractr::exact_extract(rast, poly, include_cell = FALSE, progress = FALSE)[[1]]
     
     if (base::is.null(ex) || base::nrow(ex) == 0) {
-      return(base::data.frame(percent_impervious = 'NA_real_'))
+      return(base::data.frame(percent_land_cover = NA_real_))
     }
     
-    # actual calculation of %
-      is_imp <- ex$value %in% cat_vals
-      cov    <- ex$coverage_fraction
-      percent <- base::sum(cov[is_imp], na.rm = TRUE) / base::sum(cov, na.rm = TRUE) * 100
-      return(base::data.frame(percent_impervious = percent))
+    is_target <- ex$value %in% cat_vals
+    cov <- ex$coverage_fraction
+    percent <- base::sum(cov[is_target], na.rm = TRUE) /
+      base::sum(cov, na.rm = TRUE) * 100
+    
+    base::data.frame(percent_land_cover = percent)
   })
   
   res_df <- dplyr::bind_rows(results)
+  res_df$percent_impervious <- res_df$percent_land_cover
+  
   out <- base::cbind(
-    sf::st_drop_geometry(pts)[, c("lon", "lat", 
+    sf::st_drop_geometry(pts)[, c("lon", "lat",
                                   base::setdiff(base::names(sf::st_drop_geometry(pts)), c("lon", "lat")))],
     radius_m = radius_m,
+    dataset = dataset,
     res_df
   )
   
-  return(out)
+  out
 }
-
-
-
-

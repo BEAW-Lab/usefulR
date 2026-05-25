@@ -13,57 +13,69 @@
 #' @export
 table_results <- function(label_list, model_test, test) {
   
-  #source('./scripts/00_FUNCTIONS/FUNCTION_drop1_output.R')
+  table_00 <- gtsummary::tbl_regression(
+    x = model_test,
+    intercept = TRUE,
+    label = label_list,
+    estimate_fun = ~ gtsummary::style_number(.x, digits = 2)
+  )
   
-  table_00 <- model_test %>%
-    gtsummary::tbl_regression(intercept = T,
-                              label = label_list,
-                              estimate_fun = ~ style_number(.x, digits = 2))
+  table_01 <- gtsummary::add_global_p(
+    x = table_00,
+    anova_fun = drop1_output,
+    test = test
+  )
+  table_01 <- gtsummary::bold_p(table_01, t = 0.05)
+  table_01 <- gtsummary::bold_labels(table_01)
+  table_01 <- gtsummary::italicize_levels(table_01)
+  table_01 <- gtsummary::modify_table_body(
+    x = table_01,
+    fun = function(x) {
+      output <- dplyr::left_join(
+        x = x,
+        y = dplyr::select(
+          drop1_output(model_test = model_test, test = test),
+          variable = term,
+          Chisq = statistic,
+          df
+        ),
+        by = "variable"
+      )
+      output$df <- base::ifelse(output$row_type == "label", output$df, NA)
+      output$Chisq <- base::ifelse(output$row_type == "label", output$Chisq, NA)
+      output
+    }
+  )
   
-  ## add features
-  table_01 <- table_00 %>% 
-    gtsummary::add_global_p(anova_fun = drop1_output, test = test) %>% 
-    gtsummary::bold_p(t = 0.05) %>% 
-    gtsummary::bold_labels() %>%
-    gtsummary::italicize_levels() %>% 
-    gtsummary::modify_table_body(fun = function(.){
-      output <- dplyr::left_join(x = .,
-                                 y = drop1_output(model_test = model_test, test = test) %>% 
-                                   dplyr::select(variable = term, Chisq=statistic, df),
-                                 by = "variable")
-      output$df <- base::ifelse(output$row_type == "label",  output$df, NA)
-      output$Chisq <- base::ifelse(output$row_type == "label",  output$Chisq, NA)
-      return(output)
-    })
+  table_02 <- gtsummary::modify_fmt_fun(
+    x = table_01,
+    c(Chisq) ~ function(x) gtsummary::style_number(x, digits = 2)
+  )
+  table_02 <- gtsummary::modify_fmt_fun(
+    x = table_02,
+    c(std.error) ~ function(x) gtsummary::style_number(x, digits = 2)
+  )
+  table_02 <- gtsummary::modify_fmt_fun(
+    x = table_02,
+    c(p.value) ~ function(x) gtsummary::style_number(x, digits = 3)
+  )
+  table_02 <- gtsummary::modify_table_body(
+    x = table_02,
+    fun = function(x) dplyr::relocate(x, p.value, .after = df)
+  )
+  table_02 <- gtsummary::modify_header(table_02, label ~ "**Fixed effect**")
+  table_02 <- gtsummary::modify_header(table_02, std.error ~ "**SE**")
+  table_02 <- gtsummary::modify_header(table_02, estimate ~ "**Estimate**")
   
-  if(test == 'Chisq'){
-    table_02 <- table_01 %>% 
-      gtsummary::modify_fmt_fun(c(Chisq) ~ function(x) style_number(x, digits = 2)) %>%
-      gtsummary::modify_fmt_fun(c(std.error) ~ function(x) style_number(x, digits = 2)) %>%
-      gtsummary::modify_fmt_fun(c(p.value) ~ function(x) style_number(x, digits = 3)) %>%
-      gtsummary::modify_table_body(~.x %>% dplyr::relocate(p.value, .after = df)) %>% 
-      gtsummary::modify_header(label ~ "**Fixed effect**") %>% 
-      gtsummary::modify_header(std.error ~ "**SE**") %>%
-      gtsummary::modify_header(estimate ~ "**Estimate**") %>%
-      gtsummary::modify_header(df ~ "**df**") %>% 
-      gtsummary::modify_header(Chisq ~ html("<b>&chi;<sup>2</sup></b>")) %>% 
-      gtsummary::as_gt() %>% 
-      gt::opt_footnote_marks(marks = "LETTERS")
-    
+  if (test == "Chisq") {
+    table_02 <- gtsummary::modify_header(table_02, df ~ "**df**")
+    table_02 <- gtsummary::modify_header(table_02, Chisq ~ gt::html("<b>&chi;<sup>2</sup></b>"))
   } else {
-    table_02 <- table_01 %>% 
-      gtsummary::modify_fmt_fun(c(Chisq) ~ function(x) style_number(x, digits = 2)) %>%
-      gtsummary::modify_fmt_fun(c(std.error) ~ function(x) style_number(x, digits = 2)) %>%
-      gtsummary::modify_fmt_fun(c(p.value) ~ function(x) style_number(x, digits = 3)) %>%
-      gtsummary::modify_table_body(~.x %>% dplyr::relocate(p.value, .after = df)) %>% 
-      gtsummary::modify_header(label ~ "**Fixed effect**") %>% 
-      gtsummary::modify_header(std.error ~ "**SE**") %>%
-      gtsummary::modify_header(estimate ~ "**Estimate**") %>%
-      gtsummary::modify_header(Chisq ~ "**F**") %>% 
-      gtsummary::as_gt() %>% 
-      gt::opt_footnote_marks(marks = "LETTERS")
-    
+    table_02 <- gtsummary::modify_header(table_02, Chisq ~ "**F**")
   }
-  return(table_02)
+  
+  table_02 <- gtsummary::as_gt(table_02)
+  table_02 <- gt::opt_footnote_marks(data = table_02, marks = "LETTERS")
+  
+  table_02
 }
-

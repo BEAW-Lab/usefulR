@@ -2,34 +2,48 @@
 % Please edit documentation in R/extract_land_cover.R
 \name{extract_land_cover}
 \alias{extract_land_cover}
-\title{This function calculate proportion of impervious surface (or any other habitat type) given a set of coordinates}
+\title{Calculate land-cover proportions around coordinates}
 \usage{
 extract_land_cover(
   coords,
   raster_path,
   radius_m,
-  cat_vals = c(50),
-  value_scale = 100
+  dataset = c("esawc21", "corine", "custom"),
+  cat_vals = NULL
 )
 }
 \arguments{
 \item{coords}{data.frame or matrix with columns lon, lat (WGS84)}
 
-\item{raster_path}{path to terra raster of your choice}
+\item{raster_path}{Path to a raster file or a \code{terra::SpatRaster}.}
 
-\item{radius_m}{numeric buffer radius in meters}
+\item{radius_m}{Numeric buffer radius in meters.}
 
-\item{cat_vals}{integer vector of raster values to consider 'impervious' (only for categorical) (cat_vals = 50 for impervious surface)}
+\item{dataset}{Character string indicating which land-cover classification is
+being used. Supported options are \code{"esawc21"}, \code{"corine"}, and
+\code{"custom"}.}
 
-\item{value_scale}{numeric: if fractional values are 0-100 set to 100; default 1 (0-1)}
+\item{cat_vals}{Integer vector of raster values to treat as the land-cover
+category of interest. If \code{NULL}, dataset-specific defaults are used:
+ESA WorldCover 2021 uses class \code{50} (built-up), and CORINE uses the
+artificial-surface classes \code{111, 112, 121, 122, 123, 124, 131, 132,
+133, 141, 142}.}
 }
 \value{
-data.frame with lon, lat, radius_m, percent_impervious (0-100)
+data.frame with lon, lat, radius_m, dataset, percent_land_cover, and
+percent_impervious. The \code{percent_impervious} column is retained for
+backwards compatibility and mirrors \code{percent_land_cover}.
 }
 \description{
-Function to extract the proportion of land cover around a given set of coordinates. 
-It uses ESA WorldCover 2021 data. By default, the function loads and uses land cover data from Spain, but the function 
-can take data from other geographical areas, passed to the 'rast' argument.
-
-For more information on the land cover data use here, check: https://worldcover2021.esa.int/
+Function to extract the proportion of land cover around a given set of
+coordinates. By default it uses ESA WorldCover 2021 class codes, but it can
+also work with CORINE Land Cover rasters or any other categorical land-cover
+raster provided by the user.
+}
+\details{
+For more information on the land cover datasets used here, check:
+\itemize{
+\item ESA WorldCover 2021: \url{https://worldcover2021.esa.int/}
+\item CORINE Land Cover: \url{https://land.copernicus.eu/en/products/corine-land-cover}
+}
 }

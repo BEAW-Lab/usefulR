@@ -9,19 +9,22 @@ Author: Pablo Capilla-Lasheras [aut, cre]
 Maintainer: Pablo Capilla-Lasheras <pacapilla@gmail.com>
 Description: Useful R functions for BEAW Research Group
 License: GPL-3
-Depends: R (>= 3.4.0), 
-    base,
+Depends: R (>= 3.4.0)
+Imports:
     broom,
+    curl,
     dplyr,
     ecmwfr,
-	  exactextractr,
+    exactextractr,
     gt,
     gtsummary,
+    jsonlite,
+    purrr,
     rappdirs,
-	  sf,
+    sf,
     stats,
-  	terra,
-  	utils
+    terra,
+    utils
 Suggests:
     knitr,
     rmarkdown

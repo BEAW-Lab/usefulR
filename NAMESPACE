@@ -2,6 +2,7 @@
 
 export(download_ESAWC21_raster)
 export(download_ESAWC21_raster_vignette)
+export(download_corine_raster)
 export(download_era5)
 export(download_viirs_raster)
 export(drop1_output)
