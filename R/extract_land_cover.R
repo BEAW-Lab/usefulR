@@ -23,9 +23,10 @@
 #'   ESA WorldCover 2021 uses class \code{50} (built-up), and CORINE uses the
 #'   artificial-surface classes \code{111, 112, 121, 122, 123, 124, 131, 132,
 #'   133, 141, 142}.
-#' @return data.frame with lon, lat, radius_m, dataset, percent_land_cover, and
-#'   percent_impervious. The \code{percent_impervious} column is retained for
-#'   backwards compatibility and mirrors \code{percent_land_cover}.
+#' @return data.frame with lon, lat, radius_m, dataset, and one output column.
+#'   For \code{dataset = "esawc21"}, the output column is
+#'   \code{percent_impervious}. For \code{dataset = "corine"} and
+#'   \code{dataset = "custom"}, the output column is \code{percent_land_cover}.
 #' @export
 extract_land_cover <- function(coords,
                                raster_path,
@@ -59,6 +60,12 @@ extract_land_cover <- function(coords,
     )
   }
   cat_vals <- base::as.integer(cat_vals)
+  output_col <- switch(
+    dataset,
+    esawc21 = "percent_impervious",
+    corine = "percent_land_cover",
+    custom = "percent_land_cover"
+  )
   
   rast <- if (base::inherits(raster_path, "SpatRaster")) {
     raster_path
@@ -81,7 +88,9 @@ extract_land_cover <- function(coords,
     ex <- exactextractr::exact_extract(rast, poly, include_cell = FALSE, progress = FALSE)[[1]]
     
     if (base::is.null(ex) || base::nrow(ex) == 0) {
-      return(base::data.frame(percent_land_cover = NA_real_))
+      out_i <- base::data.frame(value = NA_real_)
+      base::names(out_i) <- output_col
+      return(out_i)
     }
     
     is_target <- ex$value %in% cat_vals
@@ -89,11 +98,12 @@ extract_land_cover <- function(coords,
     percent <- base::sum(cov[is_target], na.rm = TRUE) /
       base::sum(cov, na.rm = TRUE) * 100
     
-    base::data.frame(percent_land_cover = percent)
+    out_i <- base::data.frame(value = percent)
+    base::names(out_i) <- output_col
+    out_i
   })
   
   res_df <- dplyr::bind_rows(results)
-  res_df$percent_impervious <- res_df$percent_land_cover
   
   out <- base::cbind(
     sf::st_drop_geometry(pts)[, c("lon", "lat",

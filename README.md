@@ -8,10 +8,25 @@ The package currently includes helpers to calculate urban land cover around coor
 ## **IMPORTANT**: Use our critical assessment when using these functions. Always double check that the output they produce aligns with the results of your analysis.
 
 # Installation
-```{r eval = F}
-# install.packages("devtools")
-devtools::install_github("BEAW-Lab/usefulR", build_vignettes = TRUE)
+The package metadata is set so that R dependencies listed in `Imports` are installed automatically when you install `usefulR` with a dependency-aware installer.
+
+Recommended:
+```r
+# install.packages("pak")
+pak::pkg_install("BEAW-Lab/usefulR")
 ```
+
+Alternative:
+```r
+# install.packages("remotes")
+remotes::install_github(
+  "BEAW-Lab/usefulR",
+  dependencies = TRUE,
+  build_vignettes = TRUE
+)
+```
+
+If you download the repository ZIP manually from GitHub and install it as a local source package, R may not install dependencies for you automatically. In that case, use `pak::pkg_install()` or `remotes::install_github()` instead.
 
 # Usage
 After installation, you can use the functions in this package as any other R package. If you like, you can load the package using:

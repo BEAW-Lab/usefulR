@@ -15,10 +15,9 @@ editor_options:
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
-  )
+)
 
 library(usefulR)
-
 ```
 
 In this vignette we will:
@@ -32,18 +31,29 @@ In this vignette we will:
 To install the package:
 ```{r include = T, eval = F}
 # install.packages("pak") # install pak if not previously installed
-pak::pkg_install("BEAW-Lab/usefulR") # or
-devtools::install_github("BEAW-Lab/usefulR", build_vignettes = TRUE, force = TRUE)
+pak::pkg_install("BEAW-Lab/usefulR") # recommended
+
+# alternatively:
+# install.packages("remotes")
+remotes::install_github(
+  "BEAW-Lab/usefulR",
+  dependencies = TRUE,
+  build_vignettes = TRUE,
+  force = TRUE
+)
 ```
+If you install from a manually downloaded GitHub ZIP instead of using `pak` or `remotes`, dependencies may not be installed automatically.
 
 ## Simulate data
 First, we simulate a set of coordinates within (roughly) the Iberian Peninsula. We also generate values for 
 a predictor variable.
 ```{r data simulation, include = T}
 set.seed(7)
-coor <- data.frame(lon = runif(n = 50, min = -6, max = -3),
-                   lat = runif(n = 50, min = 39, max = 42),
-                   x_var1 = rnorm(n = 50, mean = 0, sd = 5)) # this variable is made up, just a dummy to run a model later
+coor <- data.frame(
+  lon = runif(n = 50, min = -6, max = -3),
+  lat = runif(n = 50, min = 39, max = 42),
+  x_var1 = rnorm(n = 50, mean = 0, sd = 5)
+) # this variable is made up, just a dummy to run a model later
 head(coor)
 ```
 
@@ -60,7 +70,7 @@ The function can be applied to one set of coordinates (bundled in a data frame):
 vignette_dir <- tempdir()
 
 # download file INTO THIS directory
-download_ESAWC21_raster_vignette(
+usefulR::download_ESAWC21_raster_vignette(
   local_dir = vignette_dir,
   file_name = "LC_raster_example.tif",
   force = TRUE
@@ -69,35 +79,38 @@ download_ESAWC21_raster_vignette(
 # Build the final path
 path_to_raster <- file.path(vignette_dir, "LC_raster_example.tif")
 
-extract_land_cover(coords = data.frame(lon = -4.5, lat = 41.00), # (longitude, latitude) the order is important
-                   raster_path = path_to_raster,  # if the vignette is built. Name of the downloaded file
-                   radius_m = 1500,        # buffer radius in meters
-                   dataset = "esawc21")    # 'esawc21' uses class 50 (built-up) by default.
-
+usefulR::extract_land_cover(
+  coords = data.frame(lon = -4.5, lat = 41.00), # (longitude, latitude) the order is important
+  raster_path = path_to_raster, # if the vignette is built. Name of the downloaded file
+  radius_m = 1500, # buffer radius in meters
+  dataset = "esawc21"
+) # 'esawc21' uses class 50 (built-up) by default.
 ```
 
 and, it can also be applied to a set of multiple pairs of coordinates. In the code below, we calculate the proportion of impervious surface for the data set we simulated above:
 ```{r urban score, include = T}
-data_land_cover <- extract_land_cover(coords = coor %>% select(lon, lat), 
-                                      raster_path = path_to_raster,
-                                      radius_m = 1500, 
-                                      dataset = "esawc21")
+data_land_cover <- usefulR::extract_land_cover(
+  coords = coor |> dplyr::select(lon, lat),
+  raster_path = path_to_raster,
+  radius_m = 1500,
+  dataset = "esawc21"
+)
 head(data_land_cover)
 ```
 You can now then merge the calculation of percent of impervious surface into the initial dataset:
 ```{r, include = T}
-data00 <- left_join(x = coor, 
-                  y = data_land_cover, 
-                  by = c('lon', 'lat'))
+data00 <- dplyr::left_join(x = coor, y = data_land_cover, by = c('lon', 'lat'))
 
 head(data00)
 ```
 
 For this tutorial, we have only used a small raster that only covers part of the Iberian Peninsula. To use the complete raster, I have written a helper function that allows you to download a complete raster for analysis. Before running `extract_land_cover`, you just need to download this file once and save it in your computer (~700Mb):
 ```{r, include = T, eval = FALSE}
-download_ESAWC21_raster (local_dir = 'directory/to/save/raster',  # adjust to your choice
-                                    file_name = "LC_raster.tif",  # adjust to your choice
-                                    force = FALSE)
+download_ESAWC21_raster(
+  local_dir = 'directory/to/save/raster', # adjust to your choice
+  file_name = "LC_raster.tif", # adjust to your choice
+  force = FALSE
+)
 ```
 
 Once the file is downloaded and saved, you can use it to run `extract_land_cover`:
@@ -105,10 +118,12 @@ Once the file is downloaded and saved, you can use it to run `extract_land_cover
 raster_esa <- rast('./path/to/directory/where/raster/is/saved')
 plot(raster_esa) # plot the raster to double check you approximately have the geographical coverage you need
 
-extract_land_cover(coords = coor %>% select(lon, lat), 
-                   raster_path = './path/to/directory/where/raster/is/saved',
-                   radius_m = 1500, 
-                   dataset = "esawc21")
+extract_land_cover(
+  coords = coor %>% select(lon, lat),
+  raster_path = './path/to/directory/where/raster/is/saved',
+  radius_m = 1500,
+  dataset = "esawc21"
+)
 
 # once extract_land_cover runs, you can adjust the code above to merge its results to your datasest
 ```
@@ -118,29 +133,33 @@ By default the function will treat artificial-surface classes (111, 112, 121, 12
 as urban land cover:
 ```{r, include = T, eval = FALSE}
 # first download the official CORINE raster using your CLMS bearer token
-download_corine_raster(
+usefulR::download_corine_raster(
   token = Sys.getenv("CLMS_BEARER_TOKEN"),
   local_dir = "./data"
 )
 
-extract_land_cover(coords = coor %>% select(lon, lat),
-                   raster_path = "./data/CLC_CORINE_2018.tif",
-                   radius_m = 1500,
-                   dataset = "corine")
+extract_land_cover(
+  coords = coor |> dplyr::select(lon, lat),
+  raster_path = "./data/CLC_CORINE_2018.tif",
+  radius_m = 1500,
+  dataset = "corine"
+)
 ```
 
 ## Calculate artificial light at night
 With the same philosophy than the function above to calculate % of impervious surface, the function `extract_alan` allows you to calculate the amount of 
 artificial light at night around a given location. First, also following the rationale presented above, you can download a VIIRS dataset of Europe (annual average) to use as input data in the calculation: 
 ```{r, include = T, eval = TRUE}
-# temporal dir to store raster (for the purpose of building the vignette. Change 'local_dir' in download_viirs_raster() to 
+# temporal dir to store raster (for the purpose of building the vignette. Change 'local_dir' in download_viirs_raster() to
 # store the file wherever you like. You only need to download the file once)
 vignette_dir <- tempdir()
 
 # do this step only once and keep the data saved in your computer
-download_viirs_raster(local_dir = vignette_dir,      # put the directory where you want to save the file
-                            file_name = "VIIRS_Europe.tif",# adjust to the name you want to give to the file
-                            force = FALSE) 
+download_viirs_raster(
+  local_dir = vignette_dir, # put the directory where you want to save the file
+  file_name = "VIIRS_Europe.tif", # adjust to the name you want to give to the file
+  force = FALSE
+)
 
 # build the final path (for vignette purposes. You can simple specify the path to your local file in extract_alan())
 path_to_raster_viirs <- file.path(vignette_dir, "VIIRS_Europe.tif")
@@ -149,20 +168,23 @@ path_to_raster_viirs <- file.path(vignette_dir, "VIIRS_Europe.tif")
 Now, we can use the downloaded data to calculate amount of artificial light at night using `extract_alan`. Keep in mind 
 that the units of the calculation will be those in which the input raster works.
 ```{r, include = T, eval = TRUE}
-data_alan <- extract_alan(coords = coor %>% select(lon, lat), 
-             raster_path = path_to_raster_viirs,
-             radius_m = 1500)
+data_alan <- extract_alan(
+  coords = coor %>% select(lon, lat),
+  raster_path = path_to_raster_viirs,
+  radius_m = 1500
+)
 
 head(data_alan)
 ```
 You can now then merge the calculation of ALAN to the dataset for analys:
 ```{r, include = T}
-data <- left_join(x = data00, 
-                  y = data_alan %>% select(lon, lat, alan, alan_log), 
-                  by = c('lon', 'lat'))
+data <- left_join(
+  x = data00,
+  y = data_alan %>% select(lon, lat, alan, alan_log),
+  by = c('lon', 'lat')
+)
 
 head(data)
-
 ```
 
 ## Analyse the data and produce publication-ready tables
@@ -170,12 +192,14 @@ Before we run a model and show how to generate publication-ready tables, we simu
 relationship between percentage of impervious and the simulated response variable with slope 3.5. This is just to generate a dataset that we can analyse and generate a table of results but the results are meaningless. The purpose of this exercise is to show how to produce a publication-ready table. The idea is to use the function below (`table_results` with your own models to generate tables that look good and can be pasted to reports and manuscripts).
 ```{r simulate response, include = T}
 set.seed(8)
-data$response <- 3.5 * data$percent_land_cover + rnorm(n = nrow(data), mean = 0, sd = 15)
+data$response <- 3.5 *
+  data$percent_impervious +
+  rnorm(n = nrow(data), mean = 0, sd = 15)
 ```
 
-Now we run the model to explain variation in the response variable including `percent_land_cover` and `x_var1` as fixed effects.
+Now we run the model to explain variation in the response variable including `percent_impervious` and `x_var1` as fixed effects.
 ```{r model, include = T}
-model <- lm(response ~ percent_land_cover + alan + x_var1, data = data)
+model <- lm(response ~ percent_impervious + alan + x_var1, data = data)
 summary(model)
 ```
 
@@ -185,10 +209,12 @@ table_results(
   label_list = list(
     `(Intercept)` = "Intercept",
     `x_var1` = "x_var1",
-    `percent_land_cover` = '% of urban land cover',
-    `alan` = "Artificial light at night (units)"),        
-  model_test = model, 
-  test = 'F')
+    `percent_impervious` = '% of impervious surface',
+    `alan` = "Artificial light at night (units)"
+  ),
+  model_test = model,
+  test = 'F'
+)
 ```
 
 The code above renders the table in this vignette. You can also save the table to an R object and save it in your `./tables/` folder within your 
@@ -198,9 +224,11 @@ table01 <- table_results(
   label_list = list(
     `(Intercept)` = "Intercept",
     `x_var1` = "x_var1",
-    `percent_land_cover` = '% of urban land cover'),        
-  model_test = model, 
-  test = 'F')
+    `percent_impervious` = '% of impervious surface'
+  ),
+  model_test = model,
+  test = 'F'
+)
 
 gtsave(table01, "./tables/table_01.html")
 ```

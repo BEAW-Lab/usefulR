@@ -30,9 +30,10 @@ artificial-surface classes \code{111, 112, 121, 122, 123, 124, 131, 132,
 133, 141, 142}.}
 }
 \value{
-data.frame with lon, lat, radius_m, dataset, percent_land_cover, and
-percent_impervious. The \code{percent_impervious} column is retained for
-backwards compatibility and mirrors \code{percent_land_cover}.
+data.frame with lon, lat, radius_m, dataset, and one output column.
+For \code{dataset = "esawc21"}, the output column is
+\code{percent_impervious}. For \code{dataset = "corine"} and
+\code{dataset = "custom"}, the output column is \code{percent_land_cover}.
 }
 \description{
 Function to extract the proportion of land cover around a given set of
