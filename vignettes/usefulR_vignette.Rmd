@@ -42,6 +42,7 @@ remotes::install_github(
   force = TRUE
 )
 ```
+
 If you install from a manually downloaded GitHub ZIP instead of using `pak` or `remotes`, dependencies may not be installed automatically.
 
 ## Simulate data
@@ -128,19 +129,24 @@ extract_land_cover(
 # once extract_land_cover runs, you can adjust the code above to merge its results to your datasest
 ```
 
-If you want to use CORINE Land Cover instead, provide a CORINE raster and set `dataset = "corine"`.
+If you want to use CORINE Land Cover instead, first download the hosted CORINE raster with
+`download_corine_raster()`, then provide that raster and set `dataset = "corine"`.
 By default the function will treat artificial-surface classes (111, 112, 121, 122, 123, 124, 131, 132, 133, 141, 142)
 as urban land cover:
 ```{r, include = T, eval = FALSE}
-# first download the official CORINE raster using the path to your CLMS service-key JSON file
-usefulR::download_corine_raster(
-  token = Sys.getenv("CLMS_SERVICE_KEY_FILE"),
-  local_dir = "./data"
+# first download the hosted CORINE raster to your chosen local folder
+download_corine_raster(
+  local_dir = vignette_dir,
+  file_name = "CLC_CORINE_2018.tif",
+  force = TRUE
 )
+
+# then use the downloaded raster in extract_land_cover()
+path_to_raster_corine <- file.path(vignette_dir, "CLC_CORINE_2018.tif")
 
 extract_land_cover(
   coords = coor |> dplyr::select(lon, lat),
-  raster_path = "./data/CLC_CORINE_2018.tif",
+  raster_path = path_to_raster_corine,
   radius_m = 1500,
   dataset = "corine"
 )
@@ -155,7 +161,7 @@ artificial light at night around a given location. First, also following the rat
 vignette_dir <- tempdir()
 
 # do this step only once and keep the data saved in your computer
-download_viirs_raster(
+usefulR::download_viirs_raster(
   local_dir = vignette_dir, # put the directory where you want to save the file
   file_name = "VIIRS_Europe.tif", # adjust to the name you want to give to the file
   force = FALSE
@@ -168,8 +174,8 @@ path_to_raster_viirs <- file.path(vignette_dir, "VIIRS_Europe.tif")
 Now, we can use the downloaded data to calculate amount of artificial light at night using `extract_alan`. Keep in mind 
 that the units of the calculation will be those in which the input raster works.
 ```{r, include = T, eval = TRUE}
-data_alan <- extract_alan(
-  coords = coor %>% select(lon, lat),
+data_alan <- usefulR::extract_alan(
+  coords = coor |> dplyr::select(lon, lat),
   raster_path = path_to_raster_viirs,
   radius_m = 1500
 )
@@ -205,7 +211,7 @@ summary(model)
 
 Once we have the model, we can produce a table of results with `table_results`:
 ```{r table of results, include = T, eval = T}
-table_results(
+usefulR::table_results(
   label_list = list(
     `(Intercept)` = "Intercept",
     `x_var1` = "x_var1",
@@ -220,7 +226,7 @@ table_results(
 The code above renders the table in this vignette. You can also save the table to an R object and save it in your `./tables/` folder within your 
 working directory:
 ```{r save table, include = T, eval = F}
-table01 <- table_results(
+table01 <- usefulR::table_results(
   label_list = list(
     `(Intercept)` = "Intercept",
     `x_var1` = "x_var1",
@@ -230,7 +236,7 @@ table01 <- table_results(
   test = 'F'
 )
 
-gtsave(table01, "./tables/table_01.html")
+gt::gtsave(table01, "./tables/table_01.html")
 ```
 
 
