@@ -46,6 +46,31 @@ extract_land_cover <- function(
     )
   }
 
+  coords$lon <- base::as.numeric(coords$lon)
+  coords$lat <- base::as.numeric(coords$lat)
+
+  if (base::any(!base::is.finite(coords$lon)) ||
+      base::any(!base::is.finite(coords$lat))) {
+    base::stop(
+      "`coords$lon` and `coords$lat` must contain only finite numeric values.",
+      call. = FALSE
+    )
+  }
+
+  if (base::any(coords$lon < -180 | coords$lon > 180)) {
+    base::stop(
+      "`coords$lon` must be in decimal degrees within [-180, 180].",
+      call. = FALSE
+    )
+  }
+
+  if (base::any(coords$lat < -90 | coords$lat > 90)) {
+    base::stop(
+      "`coords$lat` must be in decimal degrees within [-90, 90].",
+      call. = FALSE
+    )
+  }
+
   if (
     !base::is.numeric(radius_m) ||
       base::length(radius_m) != 1L ||
@@ -151,14 +176,19 @@ extract_land_cover <- function(
     crs = 4326,
     remove = FALSE
   )
-  pts_m <- sf::st_transform(pts, 3857)
-  buffers_m <- sf::st_buffer(pts_m, dist = radius_m)
+
+  # Build the buffer geodesically from the original WGS84 coordinates so the
+  # requested radius is preserved before matching polygons to raster cells.
+  old_s2 <- sf::sf_use_s2()
+  base::on.exit(sf::sf_use_s2(old_s2), add = TRUE)
+  sf::sf_use_s2(TRUE)
+  buffers_ll <- sf::st_buffer(pts, dist = radius_m)
 
   rast_crs <- terra::crs(rast, proj = TRUE)
   if (base::is.na(rast_crs) || rast_crs == "") {
     base::stop("Raster has no CRS defined.", call. = FALSE)
   }
-  buffers_rastcrs <- sf::st_transform(buffers_m, crs = rast_crs)
+  buffers_rastcrs <- sf::st_transform(buffers_ll, crs = rast_crs)
 
   results <- base::lapply(
     base::seq_len(base::nrow(buffers_rastcrs)),

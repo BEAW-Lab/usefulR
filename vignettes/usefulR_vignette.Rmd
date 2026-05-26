@@ -105,7 +105,7 @@ data00 <- dplyr::left_join(x = coor, y = data_land_cover, by = c('lon', 'lat'))
 head(data00)
 ```
 
-For this tutorial, we have only used a small raster that only covers part of the Iberian Peninsula. To use the complete raster, I have written a helper function that allows you to download a complete raster for analysis. Before running `extract_land_cover`, you just need to download this file once and save it in your computer (~700Mb):
+For this tutorial, we have only used a small raster that only covers part of the Iberian Peninsula. To use the complete raster, I have written a helper function that allows you to download a complete raster for analysis. Before running `extract_land_cover`, you just need to download this file once and save it in your computer (~1.8 GB):
 ```{r, include = T, eval = FALSE}
 download_ESAWC21_raster(
   local_dir = 'directory/to/save/raster', # adjust to your choice
@@ -116,12 +116,12 @@ download_ESAWC21_raster(
 
 Once the file is downloaded and saved, you can use it to run `extract_land_cover`:
 ```{r, include = T, eval = FALSE}
-raster_esa <- rast('./path/to/directory/where/raster/is/saved')
+raster_esa <- terra::rast('./path/to/directory/where/raster/is/saved/LC_raster.tif')
 plot(raster_esa) # plot the raster to double check you approximately have the geographical coverage you need
 
 extract_land_cover(
-  coords = coor %>% select(lon, lat),
-  raster_path = './path/to/directory/where/raster/is/saved',
+  coords = coor |> dplyr::select(lon, lat),
+  raster_path = './path/to/directory/where/raster/is/saved/LC_raster.tif',
   radius_m = 1500,
   dataset = "esawc21"
 )
@@ -182,11 +182,11 @@ data_alan <- usefulR::extract_alan(
 
 head(data_alan)
 ```
-You can now then merge the calculation of ALAN to the dataset for analys:
+You can now then merge the calculation of ALAN to the dataset for analysis:
 ```{r, include = T}
-data <- left_join(
+data <- dplyr::left_join(
   x = data00,
-  y = data_alan %>% select(lon, lat, alan, alan_log),
+  y = data_alan |> dplyr::select(lon, lat, alan, alan_log),
   by = c('lon', 'lat')
 )
 
@@ -199,13 +199,13 @@ relationship between percentage of impervious and the simulated response variabl
 ```{r simulate response, include = T}
 set.seed(8)
 data$response <- 3.5 *
-  data$percent_impervious +
+  data$percent_urban +
   rnorm(n = nrow(data), mean = 0, sd = 15)
 ```
 
-Now we run the model to explain variation in the response variable including `percent_impervious` and `x_var1` as fixed effects.
+Now we run the model to explain variation in the response variable including `percent_urban` and `x_var1` as fixed effects.
 ```{r model, include = T}
-model <- lm(response ~ percent_impervious + alan + x_var1, data = data)
+model <- lm(response ~ percent_urban + alan + x_var1, data = data)
 summary(model)
 ```
 
@@ -215,7 +215,7 @@ usefulR::table_results(
   label_list = list(
     `(Intercept)` = "Intercept",
     `x_var1` = "x_var1",
-    `percent_impervious` = '% of impervious surface',
+    `percent_urban` = '% of impervious surface',
     `alan` = "Artificial light at night (units)"
   ),
   model_test = model,
@@ -230,7 +230,7 @@ table01 <- usefulR::table_results(
   label_list = list(
     `(Intercept)` = "Intercept",
     `x_var1` = "x_var1",
-    `percent_impervious` = '% of impervious surface'
+    `percent_urban` = '% of impervious surface'
   ),
   model_test = model,
   test = 'F'

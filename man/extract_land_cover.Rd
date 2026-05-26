@@ -31,20 +31,19 @@ artificial-surface classes \code{111, 112, 121, 122, 123, 124, 131, 132,
 }
 \value{
 data.frame with lon, lat, radius_m, dataset, and one output column.
-For \code{dataset = "esawc21"}, the output column is
-\code{percent_impervious}. For \code{dataset = "corine"} and
-\code{dataset = "custom"}, the output column is \code{percent_land_cover}.
+  For \code{dataset = "esawc21"}, the output column is
+  \code{percent_impervious}. For \code{dataset = "corine"} and
+  \code{dataset = "custom"}, the output column is \code{percent_land_cover}.
 }
 \description{
 Function to extract the proportion of land cover around a given set of
 coordinates. By default it uses ESA WorldCover 2021 class codes, but it can
 also work with CORINE Land Cover rasters or any other categorical land-cover
 raster provided by the user.
-}
-\details{
+
 For more information on the land cover datasets used here, check:
 \itemize{
-\item ESA WorldCover 2021: \url{https://worldcover2021.esa.int/}
-\item CORINE Land Cover: \url{https://land.copernicus.eu/en/products/corine-land-cover}
+  \item ESA WorldCover 2021: https://worldcover2021.esa.int/
+  \item CORINE Land Cover: https://land.copernicus.eu/en/products/corine-land-cover
 }
 }

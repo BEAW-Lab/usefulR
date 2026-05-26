@@ -5,66 +5,32 @@
 \title{Download CORINE Land Cover 2018 raster data}
 \usage{
 download_corine_raster(
-  token,
   local_dir = NULL,
   file_name = "CLC_CORINE_2018.tif",
-  force = FALSE,
-  poll_interval = 10,
-  timeout_sec = 3600,
-  keep_zip = FALSE
+  force = FALSE
 )
 }
 \arguments{
-\item{token}{Character. Either a CLMS API bearer access token, the full CLMS
-service-key JSON string, or a path to a JSON file containing the CLMS
-service key.}
-
 \item{local_dir}{Path to directory where the file should be saved.
 If \code{NULL} (default), a system cache directory is used.}
 
-\item{file_name}{Desired name for the downloaded file (e.g. \code{"CLC_CORINE_2018.tif"}).
-Must include the \code{".tif"} extension. Defaults to \code{"CLC_CORINE_2018.tif"}.}
+\item{file_name}{Desired name for the downloaded file
+(e.g. \code{"CLC_CORINE_2018.tif"}). Must include the \code{".tif"}
+extension. Defaults to \code{"CLC_CORINE_2018.tif"}.}
 
-\item{force}{Logical. If \code{TRUE}, re-downloads even if the file already exists.}
-
-\item{poll_interval}{Numeric. Seconds between status checks while the CLMS API
-prepares the download. Defaults to 10.}
-
-\item{timeout_sec}{Numeric. Maximum number of seconds to wait for the CLMS
-download job to finish. Defaults to 3600.}
-
-\item{keep_zip}{Logical. If \code{TRUE}, keeps the downloaded ZIP archive in
-\code{local_dir}. Defaults to \code{FALSE}.}
+\item{force}{Logical. If \code{TRUE}, re-downloads even if the file already
+exists.}
 }
 \value{
 The full path to the downloaded CORINE raster file.
 }
 \description{
-This helper function requests the official pre-packaged CORINE Land Cover
-2018 raster from the Copernicus Land Monitoring Service (CLMS) API, waits
-until the download is ready, and saves the main Europe GeoTIFF locally.
-}
-\details{
-The function accepts either:
-\itemize{
-\item a short-lived CLMS API bearer access token, or
-\item the full CLMS service-key JSON used to mint that access token, or
-\item a path to a JSON file containing that CLMS service key.
-}
-
-If a service-key JSON or a path to a service-key JSON file is supplied, the
-function automatically creates a JWT, exchanges it at the CLMS
-\code{@@oauth2-token} endpoint, and then uses the returned bearer token for
-the download request.
-
-Instructions to create a CLMS service key are available at
-\url{https://eea.github.io/clms-api-docs/authentication.html}.
+This helper function downloads a CORINE Land Cover 2018 raster from a
+Dropbox direct link. It stores the file locally, so it only needs to be
+downloaded once.
 }
 \examples{
 \dontrun{
-download_corine_raster(
-  token = Sys.getenv("CLMS_SERVICE_KEY_FILE"),
-  local_dir = "data"
-)
+download_corine_raster(local_dir = "data")
 }
 }
